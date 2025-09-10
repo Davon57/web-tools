@@ -4,6 +4,7 @@ import { useToolsStore } from '@/stores/counter'
 import ImageToBase64 from '@/components/tools/ImageToBase64.vue'
 import RegexTester from '@/components/tools/RegexTester.vue'
 import JsonFormatter from '@/components/tools/JsonFormatter.vue'
+import ColorPicker from '@/components/tools/ColorPicker.vue'
 
 const toolsStore = useToolsStore()
 const currentTool = ref('home')
@@ -11,7 +12,8 @@ const currentTool = ref('home')
 const tools = [
   { id: 'image-base64', name: '图片转Base64', icon: '🖼️', component: ImageToBase64 },
   { id: 'regex-tester', name: '正则表达式', icon: '🔍', component: RegexTester },
-  { id: 'json-formatter', name: 'JSON格式化', icon: '📋', component: JsonFormatter }
+  { id: 'json-formatter', name: 'JSON格式化', icon: '📋', component: JsonFormatter },
+  { id: 'color-picker', name: '颜色选择器', icon: '🎨', component: ColorPicker }
 ]
 
 const selectTool = (toolId) => {
@@ -28,18 +30,9 @@ const goHome = () => {
     <header class="app-header">
       <div class="header-content">
         <h1 class="app-title" @click="goHome">🛠️ Web工具箱</h1>
-        <nav class="nav-menu">
-          <button 
-            v-for="tool in tools" 
-            :key="tool.id"
-            @click="selectTool(tool.id)"
-            class="nav-item"
-            :class="{ active: currentTool === tool.id }"
-          >
-            <span class="nav-icon">{{ tool.icon }}</span>
-            <span class="nav-text">{{ tool.name }}</span>
-          </button>
-        </nav>
+        <div class="header-actions" v-if="currentTool !== 'home'">
+          <button @click="goHome" class="back-btn">← 返回首页</button>
+        </div>
       </div>
     </header>
     
@@ -63,7 +56,8 @@ const goHome = () => {
             <p class="tool-desc">
               {{ tool.id === 'image-base64' ? '将图片文件转换为Base64编码字符串' : 
                  tool.id === 'regex-tester' ? '测试和验证正则表达式匹配结果' :
-                 tool.id === 'json-formatter' ? '格式化、压缩和验证JSON数据' : '' }}
+                 tool.id === 'json-formatter' ? '格式化、压缩和验证JSON数据' :
+                 tool.id === 'color-picker' ? '颜色选择、格式转换和渐变生成工具' : '' }}
             </p>
             <div class="tool-favorite" @click.stop="toolsStore.toggleFavorite(tool.name)">
               {{ toolsStore.isFavorite(tool.name) ? '⭐' : '☆' }}
@@ -165,41 +159,29 @@ body {
   color: #3498db;
 }
 
-.nav-menu {
+.header-actions {
   display: flex;
-  gap: 10px;
+  align-items: center;
 }
 
-.nav-item {
+.back-btn {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  border: none;
+  padding: 10px 20px;
+  border: 2px solid #3498db;
   background: transparent;
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #2c3e50;
-  font-weight: 500;
-}
-
-.nav-item:hover {
-  background: rgba(52, 152, 219, 0.1);
   color: #3498db;
+  font-weight: 500;
+  font-size: 14px;
 }
 
-.nav-item.active {
+.back-btn:hover {
   background: #3498db;
   color: white;
-}
-
-.nav-icon {
-  font-size: 18px;
-}
-
-.nav-text {
-  font-size: 14px;
 }
 
 .app-main {
