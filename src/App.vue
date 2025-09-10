@@ -5,6 +5,11 @@ import ImageToBase64 from '@/components/tools/ImageToBase64.vue'
 import RegexTester from '@/components/tools/RegexTester.vue'
 import JsonFormatter from '@/components/tools/JsonFormatter.vue'
 import ColorPicker from '@/components/tools/ColorPicker.vue'
+import Calculator from '@/components/tools/Calculator.vue'
+import UnitConverter from '@/components/tools/UnitConverter.vue'
+import QRGenerator from '@/components/tools/QRGenerator.vue'
+import MortgageCalculator from '@/components/tools/MortgageCalculator.vue'
+import CarLoanCalculator from '@/components/tools/CarLoanCalculator.vue'
 
 const toolsStore = useToolsStore()
 const currentView = ref('home') // home, category, tool
@@ -33,10 +38,11 @@ const categories = [
     description: '日常生活中实用的小工具',
     color: '#e74c3c',
     tools: [
-      { id: 'calculator', name: '计算器', icon: '🧮', desc: '基础数学计算工具' },
-      { id: 'unit-converter', name: '单位转换', icon: '📏', desc: '长度、重量、温度等单位转换' },
-      { id: 'qr-generator', name: '二维码生成', icon: '📱', desc: '生成各种类型的二维码' },
-      { id: 'password-generator', name: '密码生成器', icon: '🔐', desc: '生成安全的随机密码' }
+      { id: 'calculator', name: '计算器', icon: '🧮', component: Calculator, desc: '基础数学计算工具' },
+      { id: 'unit-converter', name: '单位转换', icon: '📏', component: UnitConverter, desc: '长度、重量、温度等单位转换' },
+      { id: 'qr-generator', name: '二维码生成', icon: '📱', component: QRGenerator, desc: '生成各种类型的二维码' },
+      { id: 'mortgage-calculator', name: '房贷计算器', icon: '🏡', component: MortgageCalculator, desc: '房屋贷款月供和利息计算' },
+      { id: 'car-loan-calculator', name: '车贷计算器', icon: '🚗', component: CarLoanCalculator, desc: '汽车贷款月供和利息计算' }
     ]
   },
   {
