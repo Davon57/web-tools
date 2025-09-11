@@ -110,9 +110,8 @@ export const newsAPI = {
   API_KEY: '71c9f16333e0e328f0d13ba2a6f2d83f',
   BASE_URL: 'https://v.juhe.cn/toutiao/index',
 
-  // 由于CORS限制，聚合数据API无法直接从浏览器调用
-  // 这里提供一个代理方案的示例
-  PROXY_BASE_URL: '/api/proxy/juhe', // 需要后端配置代理
+  // 使用vite代理避免CORS问题
+  PROXY_BASE_URL: '/api/proxy/juhe', // 通过vite代理访问
 
   // 获取新闻列表 - 使用聚合数据真实接口（通过代理）
   async getNewsList(params = {}) {
