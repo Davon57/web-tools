@@ -1,4 +1,6 @@
 # 聚合数据API代理 - 解决生产环境CORS问题
+# 生产环境: https://web-tools-davon.netlify.app/
+# 聚合接口: https://v.juhe.cn/toutiao/index (注意使用HTTPS)
 /api/proxy/juhe/* https://v.juhe.cn/:splat 200
 
 # 默认路由重定向

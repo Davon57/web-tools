@@ -3,7 +3,11 @@
 ## 生产环境API代理配置
 
 ### 问题背景
-聚合数据API (https://v.juhe.cn) 存在CORS跨域限制，无法直接在浏览器中调用。
+聚合数据API (https://v.juhe.cn/toutiao/index) 存在CORS跨域限制，无法直接在浏览器中调用。
+
+### 环境信息
+- **生产环境URL**: https://web-tools-davon.netlify.app/
+- **聚合接口URL**: https://v.juhe.cn/toutiao/index (使用HTTPS协议)
 
 ### 解决方案
 
