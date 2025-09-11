@@ -110,8 +110,11 @@ export const newsAPI = {
   API_KEY: '71c9f16333e0e328f0d13ba2a6f2d83f',
   BASE_URL: 'https://v.juhe.cn/toutiao/index',
 
-  // 使用vite代理避免CORS问题
-  PROXY_BASE_URL: '/api/proxy/juhe', // 通过vite代理访问
+  // 根据环境动态选择API基础URL
+  get PROXY_BASE_URL() {
+    // 开发环境使用vite代理，生产环境使用Netlify重定向
+    return import.meta.env.DEV ? '/api/proxy/juhe' : '/api/proxy/juhe'
+  },
 
   // 获取新闻列表 - 使用聚合数据真实接口（通过代理）
   async getNewsList(params = {}) {

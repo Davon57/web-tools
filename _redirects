@@ -1,2 +1,5 @@
+# 聚合数据API代理 - 解决生产环境CORS问题
+/api/proxy/juhe/* https://v.juhe.cn/:splat 200
+
+# 默认路由重定向
 /* /index.html 200
-/api/* https://api.example.com/:splat 200
