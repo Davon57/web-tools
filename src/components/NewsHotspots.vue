@@ -299,11 +299,13 @@ const loadCategoryNews = async (categoryId) => {
   } catch (error) {
     console.error(`Error loading ${categoryId} news:`, error)
     
-    // 检查是否为API调用次数限制错误
+    // 检查是否为API调用次数限制错误或API服务错误
     const shouldUseCache = error.shouldUseCache || 
                           error.message.includes('调用次数') || 
                           error.message.includes('用完') ||
-                          error.message.includes('rate limit')
+                          error.message.includes('rate limit') ||
+                          error.message.includes('Unexpected token') ||
+                          error.message.includes('not valid JSON')
     
     if (shouldUseCache) {
       // 尝试使用浏览器缓存数据（忽略过期时间）

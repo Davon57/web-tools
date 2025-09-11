@@ -151,7 +151,7 @@ export const newsAPI = {
         data: [],
         message: error.message || '网络请求失败',
         errorType: errorType,
-        shouldUseCache: errorType === 'RATE_LIMIT' || errorType === 'API_QUOTA_EXCEEDED'
+        shouldUseCache: errorType === 'RATE_LIMIT' || errorType === 'API_QUOTA_EXCEEDED' || errorType === 'API_ERROR'
       }
     }
   },
@@ -172,6 +172,11 @@ export const newsAPI = {
   // 获取错误类型
   getErrorType(error) {
     const message = error.message.toLowerCase()
+    
+    // 检测JSON解析错误（通常表示API返回了HTML错误页面）
+    if (message.includes('unexpected token') || message.includes('<!doctype') || message.includes('not valid json')) {
+      return 'API_ERROR'
+    }
     
     // 检测调用次数限制相关的错误
     if (message.includes('rate limit') || message.includes('调用次数') || message.includes('quota')) {
