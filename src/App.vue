@@ -10,11 +10,20 @@ import UnitConverter from '@/components/tools/UnitConverter.vue'
 import QRGenerator from '@/components/tools/QRGenerator.vue'
 import MortgageCalculator from '@/components/tools/MortgageCalculator.vue'
 import CarLoanCalculator from '@/components/tools/CarLoanCalculator.vue'
+import SnakeGame from '@/components/tools/SnakeGame.vue'
+import TetrisGame from '@/components/tools/TetrisGame.vue'
+import MemoryGame from '@/components/tools/MemoryGame.vue'
+import PuzzleGame from '@/components/tools/PuzzleGame.vue'
+import TechNews from '@/components/tools/TechNews.vue'
+import NewsHotspots from '@/components/NewsHotspots.vue'
+import ToolboxPanel from '@/components/ToolboxPanel.vue'
 
 const toolsStore = useToolsStore()
 const currentView = ref('home') // home, category, tool
 const currentCategory = ref('')
 const currentTool = ref('')
+const showToolboxDropdown = ref(false)
+const expandedDropdownCategories = ref([])
 
 // 工具分类数据
 const categories = [
@@ -52,7 +61,7 @@ const categories = [
     description: '获取最新资讯和信息',
     color: '#f39c12',
     tools: [
-      { id: 'tech-news', name: '科技新闻', icon: '💻', desc: '最新科技资讯和动态' },
+      { id: 'tech-news', name: '科技新闻', icon: '💻', component: TechNews, desc: '最新科技资讯和动态' },
       { id: 'weather', name: '天气查询', icon: '🌤️', desc: '实时天气预报和气象信息' },
       { id: 'stock-info', name: '股票信息', icon: '📈', desc: '股票价格和市场行情' },
       { id: 'currency-rate', name: '汇率查询', icon: '💱', desc: '实时汇率转换工具' }
@@ -65,10 +74,10 @@ const categories = [
     description: '休闲娱乐小游戏合集',
     color: '#9b59b6',
     tools: [
-      { id: 'snake-game', name: '贪吃蛇', icon: '🐍', desc: '经典贪吃蛇游戏' },
-      { id: 'tetris', name: '俄罗斯方块', icon: '🧩', desc: '经典俄罗斯方块游戏' },
-      { id: 'memory-game', name: '记忆游戏', icon: '🧠', desc: '锻炼记忆力的翻牌游戏' },
-      { id: 'puzzle-game', name: '拼图游戏', icon: '🖼️', desc: '图片拼图挑战游戏' }
+      { id: 'snake-game', name: '贪吃蛇', icon: '🐍', component: SnakeGame, desc: '经典贪吃蛇游戏' },
+      { id: 'tetris', name: '俄罗斯方块', icon: '🧩', component: TetrisGame, desc: '经典俄罗斯方块游戏' },
+      { id: 'memory-game', name: '记忆游戏', icon: '🧠', component: MemoryGame, desc: '锻炼记忆力的翻牌游戏' },
+      { id: 'puzzle-game', name: '拼图游戏', icon: '🖼️', component: PuzzleGame, desc: '图片拼图挑战游戏' }
     ]
   }
 ]
@@ -114,6 +123,34 @@ const getCurrentCategory = () => {
 const getCurrentTool = () => {
   return getAllTools().find(tool => tool.id === currentTool.value)
 }
+
+const handleToolSelection = ({ categoryId, toolId }) => {
+  selectCategory(categoryId)
+  selectTool(toolId)
+}
+
+const openFavoriteTool = (toolName) => {
+  const tool = getAllTools().find(t => t.name === toolName)
+  if (tool) {
+    selectTool(tool.id)
+  }
+}
+
+const toggleToolboxDropdown = () => {
+  showToolboxDropdown.value = !showToolboxDropdown.value
+  if (!showToolboxDropdown.value) {
+    expandedDropdownCategories.value = []
+  }
+}
+
+const toggleCategoryDropdown = (categoryId) => {
+  const index = expandedDropdownCategories.value.indexOf(categoryId)
+  if (index > -1) {
+    expandedDropdownCategories.value.splice(index, 1)
+  } else {
+    expandedDropdownCategories.value.push(categoryId)
+  }
+}
 </script>
 
 <template>
@@ -133,26 +170,59 @@ const getCurrentTool = () => {
     </header>
     
     <main class="app-main">
-      <!-- 首页 - 显示分类 -->
+      <!-- 首页 - 新闻热点为主 -->
       <div v-if="currentView === 'home'" class="home-page">
-        <div class="hero-section">
-          <h2 class="hero-title">欢迎使用综合工具箱</h2>
-          <p class="hero-subtitle">多种分类工具集合，满足您的各种需求</p>
-        </div>
+        <NewsHotspots />
         
-        <div class="categories-grid">
-          <div 
-            v-for="category in categories" 
-            :key="category.id"
-            @click="selectCategory(category.id)"
-            class="category-card"
-            :style="{ borderColor: category.color }"
+        <!-- 紧凑工具箱按钮 -->
+        <div class="compact-toolbox">
+          <button 
+            class="toolbox-toggle-btn"
+            @click="toggleToolboxDropdown"
+            :class="{ 'active': showToolboxDropdown }"
           >
-            <div class="category-icon" :style="{ color: category.color }">{{ category.icon }}</div>
-            <h3 class="category-name">{{ category.name }}</h3>
-            <p class="category-desc">{{ category.description }}</p>
-            <div class="category-count">{{ category.tools.length }} 个工具</div>
-          </div>
+            🧰 工具箱
+            <span class="dropdown-arrow" :class="{ 'rotated': showToolboxDropdown }">▼</span>
+          </button>
+          
+          <transition name="dropdown">
+            <div v-if="showToolboxDropdown" class="toolbox-dropdown">
+              <div class="dropdown-header">
+                <h4>选择工具分类</h4>
+              </div>
+              <div class="category-list">
+                <div 
+                  v-for="category in categories" 
+                  :key="category.id"
+                  class="category-dropdown-item"
+                  @click="toggleCategoryDropdown(category.id)"
+                >
+                  <div class="category-header-compact">
+                    <span class="category-icon">{{ category.icon }}</span>
+                    <span class="category-name">{{ category.name }}</span>
+                    <span class="tool-count">({{ category.tools.length }})</span>
+                    <span class="expand-icon" :class="{ 'rotated': expandedDropdownCategories.includes(category.id) }">▼</span>
+                  </div>
+                  
+                  <transition name="slide-down">
+                    <div v-if="expandedDropdownCategories.includes(category.id)" class="tools-dropdown-list">
+                      <div 
+                        v-for="tool in category.tools" 
+                        :key="tool.id"
+                        class="tool-dropdown-item"
+                        :class="{ 'tool-unavailable': !tool.component }"
+                        @click.stop="handleToolSelection({ categoryId: category.id, toolId: tool.id })"
+                      >
+                        <span class="tool-icon">{{ tool.icon }}</span>
+                        <span class="tool-name">{{ tool.name }}</span>
+                        <span v-if="!tool.component" class="coming-soon">即将推出</span>
+                      </div>
+                    </div>
+                  </transition>
+                </div>
+              </div>
+            </div>
+          </transition>
         </div>
         
         <!-- 最近使用 -->
@@ -178,7 +248,7 @@ const getCurrentTool = () => {
             <button 
               v-for="favTool in toolsStore.favoriteTools" 
               :key="favTool"
-              @click="selectTool(getAllTools().find(t => t.name === favTool)?.id)"
+              @click="openFavoriteTool(favTool)"
               class="favorite-btn"
             >
               ⭐ {{ favTool }}
@@ -270,9 +340,9 @@ body {
 }
 
 .header-content {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -318,28 +388,38 @@ body {
 
 .app-main {
   flex: 1;
-  background: rgba(255, 255, 255, 0.9);
-  margin: 20px;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  height: calc(100vh - 80px); /* 减去header高度 */
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .home-page {
-  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .hero-section {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
+  padding: 20px 0;
 }
 
 .hero-title {
-  font-size: 36px;
+  font-size: 32px;
   color: #2c3e50;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .hero-subtitle {
@@ -349,18 +429,242 @@ body {
   margin: 0 auto;
 }
 
+
+
+/* 紧凑工具箱样式 */
+.compact-toolbox {
+  position: fixed;
+  top: 100px;
+  right: 30px;
+  z-index: 1000;
+}
+
+.toolbox-toggle-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+  min-width: 120px;
+  justify-content: space-between;
+}
+
+.toolbox-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.toolbox-toggle-btn.active {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.dropdown-arrow {
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.toolbox-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+  max-width: 400px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.dropdown-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #f8f9fa;
+  border-radius: 15px 15px 0 0;
+}
+
+.dropdown-header h4 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.category-list {
+  padding: 10px 0;
+}
+
+.category-dropdown-item {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.category-dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.category-header-compact {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  gap: 10px;
+}
+
+.category-header-compact .category-icon {
+  font-size: 18px;
+}
+
+.category-header-compact .category-name {
+  flex: 1;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.category-header-compact .tool-count {
+  font-size: 12px;
+  color: #7f8c8d;
+}
+
+.category-header-compact .expand-icon {
+  font-size: 10px;
+  color: #bdc3c7;
+  transition: transform 0.3s ease;
+}
+
+.category-header-compact .expand-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.tools-dropdown-list {
+  background: #f8f9fa;
+  border-top: 1px solid #ecf0f1;
+}
+
+.tool-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 40px;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tool-dropdown-item:hover {
+  background-color: #e9ecef;
+  padding-left: 45px;
+}
+
+.tool-dropdown-item.tool-unavailable {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tool-dropdown-item .tool-icon {
+  font-size: 14px;
+}
+
+.tool-dropdown-item .tool-name {
+  flex: 1;
+  font-size: 13px;
+  color: #2c3e50;
+}
+
+.tool-dropdown-item .coming-soon {
+  font-size: 10px;
+  color: #e74c3c;
+  background: #ffeaa7;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+/* 下拉动画 */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.3s ease;
+}
+
+.dropdown-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+}
+
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+}
+
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.toolbox-section {
+  margin-bottom: 50px;
+}
+
+/* 首页布局优化 */
+.home-page .recent-section,
+.home-page .favorites-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+}
+
+.home-page .recent-section h3,
+.home-page .favorites-section h3 {
+  color: #2c3e50;
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.home-page .recent-section h3::before {
+  content: '🕒';
+  font-size: 20px;
+}
+
+.home-page .favorites-section h3::before {
+  content: '⭐';
+  font-size: 20px;
+}
+
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
-  margin-bottom: 50px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
 }
 
 .tools-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 50px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
 }
 
 .category-card {
@@ -621,6 +925,62 @@ body {
   font-size: 14px;
 }
 
+/* PC端大屏幕优化 */
+@media (min-width: 1600px) {
+  .header-content {
+    max-width: 1800px;
+    padding: 0 60px;
+  }
+  
+  .home-page {
+    max-width: 1800px;
+    padding: 60px;
+  }
+  
+  .categories-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+  }
+  
+  .tools-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+  }
+}
+
+/* 中等屏幕优化 */
+@media (min-width: 1200px) and (max-width: 1599px) {
+  .categories-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+  
+  .tools-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+/* 平板端适配 */
+@media (min-width: 769px) and (max-width: 1199px) {
+  .header-content {
+    padding: 0 30px;
+  }
+  
+  .home-page {
+    padding: 30px;
+  }
+  
+  .categories-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  
+  .tools-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+}
+
+/* 移动端适配 */
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
@@ -641,8 +1001,53 @@ body {
     padding: 20px;
   }
   
+  .hero-section {
+    padding: 20px 0;
+    margin-bottom: 30px;
+  }
+  
   .hero-title {
-    font-size: 28px;
+    font-size: 26px;
+  }
+  
+  .hero-subtitle {
+    font-size: 16px;
+  }
+  
+
+  
+  /* 移动端紧凑工具箱样式 */
+  .compact-toolbox {
+    position: static;
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .toolbox-toggle-btn {
+    min-width: 140px;
+    font-size: 16px;
+    padding: 14px 24px;
+  }
+  
+  .toolbox-dropdown {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 350px;
+    max-height: 70vh;
+  }
+  
+  .toolbox-section {
+    margin-bottom: 30px;
+  }
+  
+  .home-page .recent-section,
+  .home-page .favorites-section {
+    padding: 20px;
+    margin-bottom: 20px;
   }
   
   .category-info {
