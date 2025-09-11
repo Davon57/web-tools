@@ -107,7 +107,10 @@ export const userAPI = {
 // 示例：新闻相关接口
 export const newsAPI = {
   // 聚合数据新闻API配置
-  API_KEY: '71c9f16333e0e328f0d13ba2a6f2d83f',
+  // 生产环境使用环境变量，开发环境使用默认值
+  get API_KEY() {
+    return import.meta.env.juhe_key || '71c9f16333e0e328f0d13ba2a6f2d83f'
+  },
   BASE_URL: 'https://v.juhe.cn/toutiao/index',
 
   // 根据环境动态选择API基础URL
