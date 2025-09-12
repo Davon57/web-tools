@@ -1,5 +1,8 @@
 <template>
   <div class="memory-game">
+    <div class="tool-header">
+      <button @click="$router.push('/')" class="back-btn">← 返回主页</button>
+    </div>
     <div class="game-header">
       <h2>🧠 记忆游戏</h2>
       <div class="game-info">
@@ -45,42 +48,46 @@
 
     <!-- 游戏区域 -->
     <div v-else class="game-container">
-      <div 
-        class="game-board" 
-        :style="{ 
-          gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
-          gridTemplateRows: `repeat(${gridRows}, 1fr)`
-        }"
-      >
-        <div 
-          v-for="(card, index) in cards" 
-          :key="index"
-          @click="flipCard(index)"
-          class="card"
-          :class="{
-            flipped: card.isFlipped,
-            matched: card.isMatched,
-            disabled: isCardDisabled
-          }"
-        >
-          <div class="card-inner">
-            <div class="card-front">?</div>
-            <div class="card-back">{{ card.symbol }}</div>
-          </div>
+      <div class="game-left">
+        <!-- 游戏控制 -->
+        <div class="game-controls">
+          <button @click="pauseGame" class="control-btn pause-btn">
+            {{ gamePaused ? '继续' : '暂停' }}
+          </button>
+          <button @click="resetGame" class="control-btn reset-btn">
+            重新开始
+          </button>
+          <button @click="newGame" class="control-btn new-btn">
+            新游戏
+          </button>
         </div>
       </div>
 
-      <!-- 游戏控制 -->
-      <div class="game-controls">
-        <button @click="pauseGame" class="control-btn pause-btn">
-          {{ gamePaused ? '继续' : '暂停' }}
-        </button>
-        <button @click="resetGame" class="control-btn reset-btn">
-          重新开始
-        </button>
-        <button @click="newGame" class="control-btn new-btn">
-          新游戏
-        </button>
+      <div class="game-right">
+        <div 
+          class="game-board" 
+          :style="{ 
+            gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
+            gridTemplateRows: `repeat(${gridRows}, 1fr)`
+          }"
+        >
+          <div 
+            v-for="(card, index) in cards" 
+            :key="index"
+            @click="flipCard(index)"
+            class="card"
+            :class="{
+              flipped: card.isFlipped,
+              matched: card.isMatched,
+              disabled: isCardDisabled
+            }"
+          >
+            <div class="card-inner">
+              <div class="card-front">?</div>
+              <div class="card-back">{{ card.symbol }}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -339,31 +346,71 @@ onUnmounted(() => {
 
 <style scoped>
 .memory-game {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100vw;
+  min-height: 100vh;
   padding: 20px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.tool-header {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  background: linear-gradient(145deg, #6c757d, #5a6268);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.back-btn:hover {
+  background: linear-gradient(145deg, #5a6268, #495057);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
 }
 
 .game-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .game-header h2 {
   color: #2c3e50;
   margin: 0;
+  font-size: 2.5em;
+  font-weight: 700;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .game-info {
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .info-item {
@@ -389,41 +436,54 @@ onUnmounted(() => {
 }
 
 .difficulty-selection {
-  text-align: center;
-  padding: 30px 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex: 1;
 }
 
 .difficulty-selection h3 {
   color: #2c3e50;
-  margin-bottom: 25px;
+  margin-bottom: 40px;
+  font-size: 2.2em;
+  font-weight: 600;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .difficulty-buttons {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 15px;
   margin-bottom: 30px;
 }
 
 .difficulty-btn {
-  padding: 20px;
+  padding: 25px;
   border: 2px solid #dee2e6;
-  background: white;
-  border-radius: 12px;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  border-radius: 15px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
 .difficulty-btn:hover {
   border-color: #007bff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 15px 35px rgba(0, 123, 255, 0.2);
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
 }
 
 .difficulty-btn.active {
   border-color: #007bff;
-  background: #e7f3ff;
+  background: linear-gradient(145deg, #e7f3ff, #cce7ff);
+  box-shadow: 0 12px 30px rgba(0, 123, 255, 0.25);
+  transform: translateY(-2px);
 }
 
 .diff-icon {
@@ -443,20 +503,24 @@ onUnmounted(() => {
 }
 
 .start-btn {
-  background: #28a745;
+  background: linear-gradient(145deg, #28a745, #20c997);
   color: white;
   border: none;
-  padding: 15px 30px;
-  border-radius: 25px;
-  font-size: 16px;
-  font-weight: bold;
+  padding: 18px 36px;
+  border-radius: 30px;
+  font-size: 18px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .start-btn:hover:not(:disabled) {
-  background: #218838;
-  transform: translateY(-2px);
+  background: linear-gradient(145deg, #20c997, #17a2b8);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 15px 35px rgba(40, 167, 69, 0.4);
 }
 
 .start-btn:disabled {
@@ -466,25 +530,42 @@ onUnmounted(() => {
 
 .game-container {
   display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  flex: 1;
+  min-height: 0;
+}
+
+.game-left {
+  flex: 0 0 300px;
+  display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 20px;
+}
+
+.game-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .game-board {
   display: grid;
-  gap: 10px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border: 2px solid #dee2e6;
+  gap: 15px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
 .card {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   perspective: 1000px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .card.disabled {
@@ -496,7 +577,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   text-align: center;
-  transition: transform 0.6s;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
 }
 
@@ -510,30 +591,33 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: 8px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
-  border: 2px solid #dee2e6;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .card-front {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .card-back {
-  background: white;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
   color: #2c3e50;
   transform: rotateY(180deg);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .card.matched .card-back {
-  background: #d4edda;
+  background: linear-gradient(145deg, #d4edda, #c3e6cb);
   border-color: #28a745;
-  animation: matchPulse 0.6s ease-in-out;
+  animation: matchPulse 0.8s ease-in-out;
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
 }
 
 @keyframes matchPulse {
@@ -543,43 +627,54 @@ onUnmounted(() => {
 
 .game-controls {
   display: flex;
+  flex-direction: column;
   gap: 15px;
 }
 
 .control-btn {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 20px;
-  font-weight: bold;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .pause-btn {
-  background: #ffc107;
+  background: linear-gradient(145deg, #ffc107, #e0a800);
   color: #212529;
 }
 
 .pause-btn:hover {
-  background: #e0a800;
+  background: linear-gradient(145deg, #e0a800, #d39e00);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
 }
 
 .reset-btn {
-  background: #6c757d;
+  background: linear-gradient(145deg, #6c757d, #5a6268);
   color: white;
 }
 
 .reset-btn:hover {
-  background: #545b62;
+  background: linear-gradient(145deg, #5a6268, #495057);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(108, 117, 125, 0.3);
 }
 
 .new-btn {
-  background: #17a2b8;
+  background: linear-gradient(145deg, #17a2b8, #138496);
   color: white;
 }
 
 .new-btn:hover {
-  background: #138496;
+  background: linear-gradient(145deg, #138496, #117a8b);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(23, 162, 184, 0.3);
 }
 
 .game-completed-overlay {
@@ -712,8 +807,24 @@ onUnmounted(() => {
     justify-content: center;
   }
   
+  .game-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .game-left {
+    flex: none;
+    width: 100%;
+  }
+  
+  .game-right {
+    flex: none;
+  }
+  
   .difficulty-buttons {
-    grid-template-columns: repeat(2, 1fr);
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
   .card {
@@ -727,13 +838,18 @@ onUnmounted(() => {
   }
   
   .game-controls {
-    flex-wrap: wrap;
+    flex-direction: row;
     justify-content: center;
   }
   
   .control-btn {
     padding: 8px 16px;
     font-size: 14px;
+  }
+  
+  .game-board {
+    max-width: 100%;
+    margin: 0 auto;
   }
 }
 

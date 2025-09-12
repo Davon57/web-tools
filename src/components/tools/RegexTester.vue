@@ -1,36 +1,43 @@
 <template>
   <div class="tool-container">
-    <h2 class="tool-title">正则表达式测试器</h2>
+    <div class="tool-header">
+      <button @click="$router.push('/')" class="back-btn">← 返回主页</button>
+      <h2 class="tool-title">正则表达式测试器</h2>
+    </div>
     
-    <div class="regex-section">
-      <h3>正则表达式</h3>
-      <div class="regex-input-container">
-        <input 
-          v-model="regexPattern" 
-          type="text" 
-          placeholder="输入正则表达式，例如: \d+"
-          class="regex-input"
-          @input="testRegex"
-        >
-        <div class="regex-flags">
-          <label><input type="checkbox" v-model="flags.global" @change="testRegex"> g (全局)</label>
-          <label><input type="checkbox" v-model="flags.ignoreCase" @change="testRegex"> i (忽略大小写)</label>
-          <label><input type="checkbox" v-model="flags.multiline" @change="testRegex"> m (多行)</label>
+    <div class="tester-content">
+      <div class="tester-left">
+        <div class="regex-section">
+          <h3>正则表达式</h3>
+          <div class="regex-input-container">
+            <input 
+              v-model="regexPattern" 
+              type="text" 
+              placeholder="输入正则表达式，例如: \d+"
+              class="regex-input"
+              @input="testRegex"
+            >
+            <div class="regex-flags">
+              <label><input type="checkbox" v-model="flags.global" @change="testRegex"> g (全局)</label>
+              <label><input type="checkbox" v-model="flags.ignoreCase" @change="testRegex"> i (忽略大小写)</label>
+              <label><input type="checkbox" v-model="flags.multiline" @change="testRegex"> m (多行)</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="test-text-section">
+          <h3>测试文本</h3>
+          <textarea 
+            v-model="testText" 
+            placeholder="输入要测试的文本..."
+            class="test-textarea"
+            @input="testRegex"
+          ></textarea>
         </div>
       </div>
-    </div>
-    
-    <div class="test-text-section">
-      <h3>测试文本</h3>
-      <textarea 
-        v-model="testText" 
-        placeholder="输入要测试的文本..."
-        class="test-textarea"
-        @input="testRegex"
-      ></textarea>
-    </div>
-    
-    <div v-if="regexPattern" class="results-section">
+      
+      <div class="tester-right">
+        <div v-if="regexPattern" class="results-section">
       <h3>匹配结果</h3>
       <div v-if="error" class="error-message">
         <i>⚠️</i> {{ error }}
@@ -64,14 +71,16 @@
         <div class="highlighted-content" v-html="highlightedText"></div>
       </div>
     </div>
-    
-    <div class="common-patterns">
-      <h3>常用正则表达式</h3>
-      <div class="patterns-grid">
-        <div v-for="pattern in commonPatterns" :key="pattern.name" class="pattern-item" @click="usePattern(pattern)">
-          <div class="pattern-name">{{ pattern.name }}</div>
-          <div class="pattern-regex">{{ pattern.regex }}</div>
-          <div class="pattern-desc">{{ pattern.description }}</div>
+        
+        <div class="common-patterns">
+          <h3>常用正则表达式</h3>
+          <div class="patterns-grid">
+            <div v-for="pattern in commonPatterns" :key="pattern.name" class="pattern-item" @click="usePattern(pattern)">
+              <div class="pattern-name">{{ pattern.name }}</div>
+              <div class="pattern-regex">{{ pattern.regex }}</div>
+              <div class="pattern-desc">{{ pattern.description }}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -173,24 +182,101 @@ const usePattern = (pattern) => {
 
 <style scoped>
 .tool-container {
-  max-width: 1000px;
-  margin: 0 auto;
+  width: 100vw;
+  min-height: 100vh;
   padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.95));
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.tester-content {
+  display: flex;
+  gap: 30px;
+  flex: 1;
+}
+
+.tester-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.tester-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  overflow-y: auto;
+}
+
+.tool-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.back-btn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: linear-gradient(145deg, #6c757d, #5a6268);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.back-btn:hover {
+  background: linear-gradient(145deg, #5a6268, #495057);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
 }
 
 .tool-title {
   color: #2c3e50;
   margin-bottom: 30px;
   text-align: center;
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .regex-section, .test-text-section, .results-section, .common-patterns {
-  margin-bottom: 30px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  flex: 1;
 }
 
 .regex-section h3, .test-text-section h3, .results-section h3, .common-patterns h3 {
-  color: #34495e;
-  margin-bottom: 15px;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .regex-input-container {
@@ -201,11 +287,15 @@ const usePattern = (pattern) => {
 
 .regex-input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #3498db;
-  border-radius: 8px;
-  font-size: 16px;
-  font-family: 'Courier New', monospace;
+  padding: 18px;
+  border: 3px solid rgba(0, 123, 255, 0.3);
+  border-radius: 15px;
+  font-size: 18px;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background: linear-gradient(145deg, rgba(248, 249, 250, 0.9), rgba(255, 255, 255, 0.9));
+  backdrop-filter: blur(5px);
+  box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
 .regex-flags {
@@ -222,41 +312,61 @@ const usePattern = (pattern) => {
 
 .test-textarea {
   width: 100%;
-  height: 150px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
+  flex: 1;
+  min-height: 200px;
+  padding: 18px;
+  border: 3px solid rgba(0, 123, 255, 0.2);
+  border-radius: 15px;
+  font-size: 16px;
   resize: vertical;
+  background: linear-gradient(145deg, rgba(248, 249, 250, 0.9), rgba(255, 255, 255, 0.9));
+  backdrop-filter: blur(5px);
+  box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  font-family: 'Fira Code', 'Courier New', monospace;
 }
 
 .error-message {
-  background: #fee;
-  color: #c33;
-  padding: 10px;
-  border-radius: 5px;
-  border-left: 4px solid #e74c3c;
+  background: linear-gradient(145deg, rgba(254, 238, 238, 0.9), rgba(252, 226, 226, 0.9));
+  color: #dc3545;
+  padding: 20px;
+  border-radius: 15px;
+  border-left: 6px solid #dc3545;
+  box-shadow: 0 10px 25px rgba(220, 53, 69, 0.1);
+  backdrop-filter: blur(5px);
+  font-weight: 600;
 }
 
 .matches-container {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
+  background: linear-gradient(145deg, rgba(248, 249, 250, 0.9), rgba(233, 236, 239, 0.9));
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 18px;
+  border: 2px solid rgba(222, 226, 230, 0.5);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
 .matches-summary {
-  font-weight: bold;
-  color: #27ae60;
-  margin-bottom: 15px;
+  font-weight: 700;
+  color: #28a745;
+  margin-bottom: 20px;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, #28a745, #20c997);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .match-item {
-  background: white;
-  padding: 15px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  border-left: 4px solid #3498db;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+  backdrop-filter: blur(5px);
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 15px;
+  border-left: 6px solid #007bff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
 }
 
 .match-header {
@@ -268,11 +378,14 @@ const usePattern = (pattern) => {
 }
 
 .match-content {
-  font-family: 'Courier New', monospace;
-  background: #e8f4fd;
-  padding: 8px;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background: linear-gradient(145deg, rgba(232, 244, 253, 0.9), rgba(207, 236, 255, 0.9));
+  backdrop-filter: blur(5px);
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 2px solid rgba(0, 123, 255, 0.2);
+  font-size: 16px;
 }
 
 .match-groups {
@@ -291,19 +404,25 @@ const usePattern = (pattern) => {
 }
 
 .group-content {
-  font-family: 'Courier New', monospace;
-  background: #f3e5f5;
-  padding: 2px 6px;
-  border-radius: 3px;
-  margin-left: 10px;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background: linear-gradient(145deg, rgba(243, 229, 245, 0.9), rgba(233, 213, 255, 0.9));
+  backdrop-filter: blur(3px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-left: 15px;
+  border: 1px solid rgba(142, 68, 173, 0.3);
+  font-size: 14px;
 }
 
 .no-matches {
-  background: #fff3cd;
+  background: linear-gradient(145deg, rgba(255, 243, 205, 0.9), rgba(254, 235, 179, 0.9));
   color: #856404;
-  padding: 10px;
-  border-radius: 5px;
-  border-left: 4px solid #ffc107;
+  padding: 20px;
+  border-radius: 15px;
+  border-left: 6px solid #ffc107;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 10px 25px rgba(255, 193, 7, 0.1);
+  font-weight: 600;
 }
 
 .highlighted-text {
@@ -311,13 +430,16 @@ const usePattern = (pattern) => {
 }
 
 .highlighted-content {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  font-family: 'Courier New', monospace;
+  background: linear-gradient(145deg, rgba(248, 249, 250, 0.9), rgba(233, 236, 239, 0.9));
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 18px;
+  border: 2px solid rgba(222, 226, 230, 0.5);
+  font-family: 'Fira Code', 'Courier New', monospace;
   white-space: pre-wrap;
-  line-height: 1.5;
+  line-height: 1.6;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
 }
 
 :deep(.highlight) {
@@ -329,22 +451,26 @@ const usePattern = (pattern) => {
 
 .patterns-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
 }
 
 .pattern-item {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 18px;
+  border: 2px solid rgba(222, 226, 230, 0.5);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .pattern-item:hover {
-  border-color: #3498db;
-  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+  border-color: rgba(0, 123, 255, 0.8);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 123, 255, 0.2);
+  background: linear-gradient(145deg, rgba(227, 242, 253, 0.9), rgba(187, 222, 251, 0.9));
 }
 
 .pattern-name {
@@ -354,16 +480,54 @@ const usePattern = (pattern) => {
 }
 
 .pattern-regex {
-  font-family: 'Courier New', monospace;
-  background: #f8f9fa;
-  padding: 5px 8px;
-  border-radius: 4px;
-  margin-bottom: 5px;
-  font-size: 12px;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  background: linear-gradient(145deg, rgba(248, 249, 250, 0.9), rgba(233, 236, 239, 0.9));
+  backdrop-filter: blur(5px);
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border: 2px solid rgba(0, 123, 255, 0.1);
+  font-weight: 600;
 }
 
 .pattern-desc {
   font-size: 12px;
   color: #7f8c8d;
+}
+
+@media (max-width: 768px) {
+  .tool-container {
+    padding: 15px;
+  }
+  
+  .tester-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .tester-left, .tester-right {
+    flex: none;
+  }
+  
+  .tester-right {
+    overflow-y: visible;
+  }
+  
+  .regex-section, .test-text-section, .results-section, .common-patterns {
+    padding: 20px;
+  }
+  
+  .tool-title {
+    font-size: 2.5rem;
+  }
+  
+  .test-textarea {
+    min-height: 150px;
+  }
+  
+  .patterns-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

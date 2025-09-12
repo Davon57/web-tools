@@ -1,8 +1,11 @@
 <template>
   <div class="unit-converter">
     <div class="converter-container">
-      <h2 class="tool-title">📏 单位转换器</h2>
-      <p class="tool-description">支持长度、重量、温度、面积、体积等多种单位转换</p>
+      <div class="tool-header">
+        <button @click="$router.push('/')" class="back-btn">← 返回主页</button>
+        <h2 class="tool-title">📏 单位转换器</h2>
+        <p class="tool-description">支持长度、重量、温度、面积、体积等多种单位转换</p>
+      </div>
       
       <div class="converter-body">
         <!-- 转换类型选择 -->
@@ -355,67 +358,130 @@ onMounted(() => {
 
 <style scoped>
 .unit-converter {
-  padding: 20px;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 40px;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .converter-container {
-  background: white;
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+  backdrop-filter: blur(10px);
+  border-radius: 25px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.tool-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.back-btn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: linear-gradient(145deg, #6c757d, #5a6268);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.back-btn:hover {
+  background: linear-gradient(145deg, #5a6268, #495057);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
 }
 
 .tool-title {
-  font-size: 24px;
   color: #2c3e50;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   text-align: center;
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tool-description {
-  color: #7f8c8d;
   text-align: center;
-  margin-bottom: 30px;
+  color: #6c757d;
+  margin-bottom: 40px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .category-selector {
-  margin-bottom: 30px;
+  margin-bottom: 40px;
+  padding: 30px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(248, 249, 250, 0.8));
+  backdrop-filter: blur(5px);
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
 .category-selector h3 {
   color: #2c3e50;
-  margin-bottom: 15px;
-  font-size: 18px;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .category-buttons {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
 }
 
 .category-btn {
-  padding: 12px 16px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  background: white;
+  padding: 18px 24px;
+  border: 3px solid rgba(233, 236, 239, 0.5);
+  border-radius: 15px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+  backdrop-filter: blur(5px);
   color: #495057;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
 .category-btn:hover {
-  border-color: #3498db;
-  background: #f8f9fa;
+  border-color: rgba(0, 123, 255, 0.8);
+  background: linear-gradient(145deg, rgba(227, 242, 253, 0.9), rgba(187, 222, 251, 0.9));
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(0, 123, 255, 0.2);
 }
 
 .category-btn.active {
-  border-color: #3498db;
-  background: #3498db;
+  border-color: #007bff;
+  background: linear-gradient(145deg, #007bff, #0056b3);
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(0, 123, 255, 0.3);
 }
 
 .conversion-row {

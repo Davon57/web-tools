@@ -1,28 +1,52 @@
 <template>
   <div class="color-picker-container">
     <div class="tool-header">
+      <button @click="$router.push('/')" class="back-btn">← 返回主页</button>
       <h2>🎨 颜色选择器</h2>
       <p>选择颜色并获取多种格式的颜色值</p>
     </div>
 
     <div class="color-picker-content">
-      <!-- 主要颜色选择区域 -->
-      <div class="color-main-section">
-        <div class="color-display">
-          <div 
-            class="color-preview" 
-            :style="{ backgroundColor: currentColor }"
-          ></div>
-          <input 
-            type="color" 
-            v-model="currentColor" 
-            class="color-input"
-            @input="updateColor"
-          >
+      <!-- 左侧：颜色选择和调色板 -->
+      <div class="color-picker-left">
+        <!-- 主要颜色选择区域 -->
+        <div class="color-main-section">
+          <div class="color-display">
+            <div 
+              class="color-preview" 
+              :style="{ backgroundColor: currentColor }"
+            ></div>
+            <input 
+              type="color" 
+              v-model="currentColor" 
+              class="color-input"
+              @input="updateColor"
+            >
+          </div>
         </div>
-
+        
+        <!-- 调色板 -->
+        <div class="palette-section">
+          <h3>常用颜色</h3>
+          <div class="color-palette">
+            <div 
+              v-for="color in commonColors" 
+              :key="color"
+              class="palette-color"
+              :style="{ backgroundColor: color }"
+              @click="selectPaletteColor(color)"
+              :title="color"
+            ></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 右侧：颜色值和历史记录 -->
+      <div class="color-picker-right">
         <!-- 颜色值显示 -->
-        <div class="color-values">
+        <div class="color-values-section">
+          <h3>颜色值</h3>
+          <div class="color-values">
           <div class="color-format">
             <label>HEX:</label>
             <div class="value-group">
@@ -75,25 +99,10 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- 调色板 -->
-      <div class="palette-section">
-        <h3>常用颜色</h3>
-        <div class="color-palette">
-          <div 
-            v-for="color in commonColors" 
-            :key="color"
-            class="palette-color"
-            :style="{ backgroundColor: color }"
-            @click="selectPaletteColor(color)"
-            :title="color"
-          ></div>
         </div>
-      </div>
-
-      <!-- 渐变色生成 -->
-      <div class="gradient-section">
+        
+        <!-- 渐变色生成 -->
+        <div class="gradient-section">
         <h3>渐变色生成</h3>
         <div class="gradient-controls">
           <div class="gradient-colors">
@@ -119,25 +128,26 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- 颜色历史 -->
-      <div class="history-section" v-if="colorHistory.length > 0">
-        <h3>颜色历史</h3>
-        <div class="color-history">
-          <div 
-            v-for="(color, index) in colorHistory" 
-            :key="index"
-            class="history-color"
-            :style="{ backgroundColor: color }"
-            @click="selectPaletteColor(color)"
-            :title="color"
-          ></div>
+        
+        <!-- 颜色历史 -->
+        <div class="history-section" v-if="colorHistory.length > 0">
+          <h3>颜色历史</h3>
+          <div class="color-history">
+            <div 
+              v-for="(color, index) in colorHistory" 
+              :key="index"
+              class="history-color"
+              :style="{ backgroundColor: color }"
+              @click="selectPaletteColor(color)"
+              :title="color"
+            ></div>
+          </div>
+          <button @click="clearHistory" class="clear-history-btn">清空历史</button>
         </div>
-        <button @click="clearHistory" class="clear-history-btn">清空历史</button>
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script setup>
@@ -298,41 +308,98 @@ watch(currentColor, (newColor) => {
 
 <style scoped>
 .color-picker-container {
-  max-width: 1000px;
-  margin: 0 auto;
+  width: 100vw;
+  min-height: 100vh;
   padding: 20px;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .tool-header {
+  position: relative;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid rgba(0, 123, 255, 0.1);
+}
+
+.back-btn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: linear-gradient(145deg, #6c757d, #5a6268);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.back-btn:hover {
+  background: linear-gradient(145deg, #5a6268, #495057);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
 }
 
 .tool-header h2 {
   color: #2c3e50;
-  margin-bottom: 10px;
-  font-size: 2.5em;
+  margin-bottom: 15px;
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tool-header p {
-  color: #7f8c8d;
-  font-size: 1.1em;
+  color: #6c757d;
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .color-picker-content {
   display: flex;
-  flex-direction: column;
   gap: 30px;
+  margin-top: 30px;
+  flex: 1;
+  min-height: 0;
+}
+
+.color-picker-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.color-picker-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .color-main-section {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: 30px;
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  gap: 40px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 35px;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
 .color-display {
@@ -352,10 +419,12 @@ watch(currentColor, (newColor) => {
 
 .color-input {
   width: 100px;
-  height: 50px;
-  border: none;
-  border-radius: 10px;
+  height: 60px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
   cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .color-values {
@@ -392,63 +461,90 @@ watch(currentColor, (newColor) => {
 }
 
 .copy-btn {
-  padding: 10px 15px;
-  background: #3498db;
+  background: linear-gradient(145deg, #3498db, #2980b9);
   color: white;
   border: none;
-  border-radius: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.3s;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .copy-btn:hover {
-  background: #2980b9;
+  background: linear-gradient(145deg, #2980b9, #21618c);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
 }
 
-.palette-section,
+.palette-section {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 35px;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  flex: 1;
+}
+
 .gradient-section,
 .history-section {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 35px;
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  flex: 1;
 }
 
 .palette-section h3,
 .gradient-section h3,
 .history-section h3 {
   color: #2c3e50;
-  margin-bottom: 20px;
-  font-size: 1.3em;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .color-palette,
 .color-history {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-  gap: 10px;
-  margin-bottom: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .palette-color,
 .history-color {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
   cursor: pointer;
-  border: 2px solid #ecf0f1;
-  transition: transform 0.2s;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .palette-color:hover,
 .history-color:hover {
-  transform: scale(1.1);
+  transform: scale(1.15) translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  border-color: rgba(255, 255, 255, 1);
 }
 
 .gradient-controls {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 25px;
 }
 
 .gradient-colors {
@@ -459,7 +555,13 @@ watch(currentColor, (newColor) => {
 .gradient-color-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .gradient-color-item label {
@@ -468,11 +570,13 @@ watch(currentColor, (newColor) => {
 }
 
 .gradient-color-item input[type="color"] {
-  width: 50px;
-  height: 40px;
-  border: none;
-  border-radius: 8px;
+  width: 60px;
+  height: 50px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
   cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .gradient-preview {
@@ -505,20 +609,47 @@ watch(currentColor, (newColor) => {
 }
 
 .clear-history-btn {
-  padding: 8px 15px;
-  background: #e74c3c;
+  background: linear-gradient(145deg, #e74c3c, #c0392b);
   color: white;
   border: none;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background 0.3s;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .clear-history-btn:hover {
-  background: #c0392b;
+  background: linear-gradient(145deg, #c0392b, #a93226);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4);
 }
 
 @media (max-width: 768px) {
+  .color-picker-container {
+    padding: 15px;
+    min-height: 100vh;
+  }
+  
+  .color-picker-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .color-picker-left,
+  .color-picker-right {
+    flex: none;
+  }
+  
+  .color-picker-right {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
   .color-main-section {
     grid-template-columns: 1fr;
     text-align: center;

@@ -1,28 +1,33 @@
 <template>
   <div class="qr-generator">
     <div class="generator-container">
-      <h2 class="tool-title">📱 二维码生成器</h2>
-      <p class="tool-description">快速生成各种类型的二维码，支持文本、网址、WiFi、联系人等</p>
+      <div class="tool-header">
+        <button @click="$router.push('/')" class="back-btn">← 返回主页</button>
+        <h2 class="tool-title">📱 二维码生成器</h2>
+        <p class="tool-description">快速生成各种类型的二维码，支持文本、网址、WiFi、联系人等</p>
+      </div>
       
       <div class="generator-body">
-        <!-- 二维码类型选择 -->
-        <div class="type-selector">
-          <h3>选择二维码类型</h3>
-          <div class="type-buttons">
-            <button 
-              v-for="type in qrTypes" 
-              :key="type.key"
-              @click="selectType(type.key)"
-              :class="['type-btn', { active: selectedType === type.key }]"
-            >
-              {{ type.icon }} {{ type.name }}
-            </button>
+        <!-- 左侧：输入控制区域 -->
+        <div class="generator-left">
+          <!-- 二维码类型选择 -->
+          <div class="type-selector">
+            <h3>选择二维码类型</h3>
+            <div class="type-buttons">
+              <button 
+                v-for="type in qrTypes" 
+                :key="type.key"
+                @click="selectType(type.key)"
+                :class="['type-btn', { active: selectedType === type.key }]"
+              >
+                {{ type.icon }} {{ type.name }}
+              </button>
+            </div>
           </div>
-        </div>
-        
-        <!-- 输入区域 -->
-        <div class="input-section">
-          <!-- 文本类型 -->
+          
+          <!-- 输入区域 -->
+          <div class="input-section">
+            <!-- 文本类型 -->
           <div v-if="selectedType === 'text'" class="input-group">
             <label>输入文本内容</label>
             <textarea 
@@ -175,10 +180,14 @@
             </div>
           </div>
         </div>
+        <!-- input-section 闭合 -->
+        </div>
         
-        <!-- 二维码显示和设置 -->
-        <div class="qr-display-section">
-          <div class="qr-settings">
+        <!-- 右侧：二维码预览和历史记录 -->
+        <div class="generator-right">
+          <!-- 二维码显示和设置 -->
+          <div class="qr-display-section">
+            <div class="qr-settings">
             <h3>二维码设置</h3>
             <div class="settings-row">
               <div class="setting-group">
@@ -242,32 +251,33 @@
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- 生成历史 -->
-        <div class="history-section" v-if="qrHistory.length > 0">
-          <h3>生成历史</h3>
-          <div class="history-list">
-            <div 
-              v-for="(record, index) in qrHistory.slice(-6)" 
-              :key="index"
-              class="history-item"
-              @click="useHistoryRecord(record)"
-            >
-              <div class="history-qr">
-                <img :src="record.dataURL" alt="历史二维码" class="history-qr-image">
-              </div>
-              <div class="history-info">
-                <div class="history-type">{{ getTypeName(record.type) }}</div>
-                <div class="history-content">{{ record.preview }}</div>
-                <div class="history-time">{{ formatTime(record.timestamp) }}</div>
+          
+          <!-- 生成历史 -->
+          <div class="history-section" v-if="qrHistory.length > 0">
+            <h3>生成历史</h3>
+            <div class="history-list">
+              <div 
+                v-for="(record, index) in qrHistory.slice(-6)" 
+                :key="index"
+                class="history-item"
+                @click="useHistoryRecord(record)"
+              >
+                <div class="history-qr">
+                  <img :src="record.dataURL" alt="历史二维码" class="history-qr-image">
+                </div>
+                <div class="history-info">
+                  <div class="history-type">{{ getTypeName(record.type) }}</div>
+                  <div class="history-content">{{ record.preview }}</div>
+                  <div class="history-time">{{ formatTime(record.timestamp) }}</div>
+                </div>
               </div>
             </div>
+            <button @click="clearHistory" class="clear-history-btn">清空历史</button>
           </div>
-          <button @click="clearHistory" class="clear-history-btn">清空历史</button>
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -495,22 +505,61 @@ onMounted(() => {
 <style scoped>
 .qr-generator {
   padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100vw;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-sizing: border-box;
 }
 
 .generator-container {
-  background: white;
-  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
   padding: 30px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+}
+
+.tool-header {
+  position: relative;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.back-btn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: linear-gradient(145deg, #6c757d, #5a6268);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.back-btn:hover {
+  background: linear-gradient(145deg, #5a6268, #495057);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
 }
 
 .tool-title {
-  font-size: 24px;
+  font-size: 2.5em;
   color: #2c3e50;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   text-align: center;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .tool-description {
@@ -519,42 +568,80 @@ onMounted(() => {
   margin-bottom: 30px;
 }
 
+.generator-body {
+  display: flex;
+  gap: 30px;
+  flex: 1;
+  min-height: 0;
+}
+
+.generator-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.generator-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .type-selector {
   margin-bottom: 30px;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  padding: 30px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .type-selector h3 {
   color: #2c3e50;
-  margin-bottom: 15px;
-  font-size: 18px;
+  margin-bottom: 25px;
+  font-size: 1.5em;
+  font-weight: 600;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
 }
 
 .type-buttons {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
 }
 
 .type-btn {
-  padding: 12px 16px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  background: white;
+  padding: 15px 20px;
+  border: 2px solid #dee2e6;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  border-radius: 12px;
   color: #495057;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  font-weight: 600;
   font-size: 14px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
 .type-btn:hover {
-  border-color: #3498db;
-  background: #f8f9fa;
+  border-color: #007bff;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 123, 255, 0.2);
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
 }
 
 .type-btn.active {
-  border-color: #3498db;
-  background: #3498db;
-  color: white;
+  border-color: #007bff;
+  background: linear-gradient(145deg, #e7f3ff, #cce7ff);
+  color: #0056b3;
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.25);
+  transform: translateY(-2px);
 }
 
 .input-section {
@@ -580,11 +667,13 @@ input[type="tel"],
 textarea,
 select {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: border-color 0.2s ease;
+  padding: 12px 16px;
+  border: 2px solid #ced4da;
+  border-radius: 10px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .text-input {
@@ -596,14 +685,17 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: #3498db;
+  border-color: #007bff;
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15), inset 0 2px 5px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  transform: translateY(-1px);
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .checkbox-label {
@@ -618,16 +710,24 @@ select:focus {
 }
 
 .qr-display-section {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 30px;
-  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  padding: 25px;
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  flex: 1;
 }
 
 .qr-settings h3 {
   color: #2c3e50;
-  margin-bottom: 20px;
-  font-size: 18px;
+  margin-bottom: 25px;
+  font-size: 1.5em;
+  font-weight: 600;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
 }
 
 .settings-row {
@@ -661,6 +761,12 @@ select:focus {
 
 .qr-container {
   text-align: center;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  padding: 25px;
+  border-radius: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .qr-image {
@@ -679,30 +785,39 @@ select:focus {
 
 .download-btn,
 .copy-btn {
-  padding: 10px 20px;
+  padding: 12px 24px;
+  margin: 0 8px;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
 }
 
 .download-btn {
-  background: #3498db;
+  background: linear-gradient(145deg, #28a745, #20c997);
   color: white;
 }
 
 .download-btn:hover {
-  background: #2980b9;
+  background: linear-gradient(145deg, #20c997, #17a2b8);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
 }
 
 .copy-btn {
-  background: #2ecc71;
+  background: linear-gradient(145deg, #007bff, #0056b3);
   color: white;
 }
 
 .copy-btn:hover {
-  background: #27ae60;
+  background: linear-gradient(145deg, #0056b3, #004085);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 25px rgba(0, 123, 255, 0.3);
 }
 
 .qr-placeholder {
@@ -726,9 +841,14 @@ select:focus {
 }
 
 .history-section {
-  background: #f8f9fa;
-  border-radius: 10px;
-  padding: 20px;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  border-radius: 15px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .history-section h3 {
@@ -738,10 +858,13 @@ select:focus {
 }
 
 .history-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-bottom: 20px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .history-item {
@@ -813,8 +936,27 @@ select:focus {
 }
 
 @media (max-width: 768px) {
-  .qr-display-section {
-    grid-template-columns: 1fr;
+  .qr-generator {
+    padding: 15px;
+  }
+  
+  .generator-container {
+    padding: 20px;
+    height: calc(100vh - 30px);
+  }
+  
+  .generator-body {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .generator-left,
+  .generator-right {
+    flex: none;
+  }
+  
+  .generator-right {
+    max-height: 50vh;
   }
   
   .form-row {
@@ -827,10 +969,6 @@ select:focus {
   
   .type-buttons {
     grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .history-list {
-    grid-template-columns: 1fr;
   }
   
   .qr-actions {
