@@ -142,6 +142,8 @@ const systemTools = ref([
   { id: 'color', name: '颜色工具', icon: '🎨', component: 'ColorPicker' },
   { id: 'json', name: 'JSON', icon: '📋', component: 'JsonFormatter' },
   { id: 'regex', name: '正则测试', icon: '🔍', component: 'RegexTester' },
+  { id: 'code-snippets', name: '常用代码', icon: '💻', component: 'CodeSnippets' },
+  { id: 'ocr', name: 'OCR识别', icon: '👁️', component: 'OCRTool' },
   { id: 'memory', name: '记忆游戏', icon: '🧠', component: 'MemoryGame' }
 ])
 
@@ -1664,8 +1666,10 @@ const openTool = (tool) => {
     'color': '/color-picker',
     'json': '/json-formatter',
     'regex': '/regex-tester',
+    'code-snippets': '/code-snippets',
     'unit': '/unit-converter',
-    'memory': '/memory-game'
+    'memory': '/memory-game',
+    'ocr': '/ocr-tool'
   }
   
   const route = routeMap[tool.id]

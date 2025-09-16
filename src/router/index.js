@@ -2,12 +2,14 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Workspace from '@/components/Workspace.vue'
 import Calculator from '@/components/tools/Calculator.vue'
 import ColorPicker from '@/components/tools/ColorPicker.vue'
-import ImageToBase64 from '@/components/tools/ImageToBase64.vue'
-import JsonFormatter from '@/components/tools/JsonFormatter.vue'
-import MemoryGame from '@/components/tools/MemoryGame.vue'
-import QRGenerator from '@/components/tools/QRGenerator.vue'
-import RegexTester from '@/components/tools/RegexTester.vue'
 import UnitConverter from '@/components/tools/UnitConverter.vue'
+import QRGenerator from '@/components/tools/QRGenerator.vue'
+import JsonFormatter from '@/components/tools/JsonFormatter.vue'
+import RegexTester from '@/components/tools/RegexTester.vue'
+import MemoryGame from '@/components/tools/MemoryGame.vue'
+import ImageToBase64 from '@/components/tools/ImageToBase64.vue'
+import CodeSnippets from '@/components/tools/CodeSnippets.vue'
+import OCRTool from '@/components/tools/OCRTool.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,10 +56,21 @@ const router = createRouter({
       name: 'RegexTester',
       component: RegexTester
     },
+
     {
       path: '/unit-converter',
       name: 'UnitConverter',
       component: UnitConverter
+    },
+    {
+      path: '/code-snippets',
+      name: 'CodeSnippets',
+      component: CodeSnippets
+    },
+    {
+      path: '/ocr-tool',
+      name: 'OCRTool',
+      component: OCRTool
     }
   ],
 })

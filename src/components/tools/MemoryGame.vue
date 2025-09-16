@@ -1,9 +1,10 @@
 <template>
   <div class="memory-game">
-    <div class="tool-header">
-      <button @click="$router.push('/')" class="back-btn">← 返回主页</button>
-    </div>
-    <div class="game-header">
+    <div class="game-wrapper">
+      <div class="tool-header">
+        <button @click="$router.push('/')" class="back-btn">← 返回主页</button>
+      </div>
+      <div class="game-header">
       <h2>🧠 记忆游戏</h2>
       <div class="game-info">
         <div class="info-item">
@@ -21,29 +22,47 @@
       </div>
     </div>
 
-    <!-- 难度选择 -->
-    <div v-if="!gameStarted" class="difficulty-selection">
-      <h3>选择难度</h3>
-      <div class="difficulty-buttons">
+    <!-- 难度选择和游戏说明 -->
+    <div v-if="!gameStarted" class="difficulty-and-instructions">
+      <div class="difficulty-selection">
+        <h3>选择难度</h3>
+        <div class="difficulty-buttons">
+          <button 
+            v-for="diff in difficulties" 
+            :key="diff.name"
+            @click="selectDifficulty(diff)"
+            class="difficulty-btn"
+            :class="{ active: selectedDifficulty?.name === diff.name }"
+          >
+            <div class="diff-icon">{{ diff.icon }}</div>
+            <div class="diff-name">{{ diff.name }}</div>
+            <div class="diff-desc">{{ diff.grid }}张卡片</div>
+          </button>
+        </div>
         <button 
-          v-for="diff in difficulties" 
-          :key="diff.name"
-          @click="selectDifficulty(diff)"
-          class="difficulty-btn"
-          :class="{ active: selectedDifficulty?.name === diff.name }"
+          @click="startGame" 
+          :disabled="!selectedDifficulty"
+          class="start-btn"
         >
-          <div class="diff-icon">{{ diff.icon }}</div>
-          <div class="diff-name">{{ diff.name }}</div>
-          <div class="diff-desc">{{ diff.grid }}张卡片</div>
+          开始游戏
         </button>
       </div>
-      <button 
-        @click="startGame" 
-        :disabled="!selectedDifficulty"
-        class="start-btn"
-      >
-        开始游戏
-      </button>
+      
+      <!-- 游戏说明 -->
+      <div class="game-instructions">
+        <div class="instructions-header" @click="toggleInstructions">
+          <h4>游戏说明 {{ showInstructions ? '▼' : '▶' }}</h4>
+        </div>
+        <div v-show="showInstructions" class="instructions-content">
+          <ul>
+            <li>点击卡片翻开，找到相同的符号进行配对</li>
+            <li>每次只能翻开两张卡片</li>
+            <li>配对成功的卡片会保持翻开状态</li>
+            <li>用最少的步数和时间完成所有配对</li>
+            <li>不同难度有不同数量的卡片</li>
+          </ul>
+        </div>
+      </div>
     </div>
 
     <!-- 游戏区域 -->
@@ -116,16 +135,7 @@
       </div>
     </div>
 
-    <!-- 游戏说明 -->
-    <div class="game-instructions">
-      <h4>游戏说明:</h4>
-      <ul>
-        <li>点击卡片翻开，找到相同的符号进行配对</li>
-        <li>每次只能翻开两张卡片</li>
-        <li>配对成功的卡片会保持翻开状态</li>
-        <li>用最少的步数和时间完成所有配对</li>
-        <li>不同难度有不同数量的卡片</li>
-      </ul>
+
     </div>
   </div>
 </template>
@@ -141,6 +151,7 @@ const gameTime = ref(0)
 const moves = ref(0)
 const finalTime = ref(0)
 const finalMoves = ref(0)
+const showInstructions = ref(false)
 
 // 难度设置
 const difficulties = [
@@ -338,6 +349,11 @@ const formatTime = (seconds) => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
 }
 
+// 切换游戏说明显示
+const toggleInstructions = () => {
+  showInstructions.value = !showInstructions.value
+}
+
 // 组件卸载
 onUnmounted(() => {
   stopTimer()
@@ -346,31 +362,39 @@ onUnmounted(() => {
 
 <style scoped>
 .memory-game {
-  width: 100vw;
   min-height: 100vh;
-  padding: 20px;
+  padding: 10px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  align-items: center;
+}
+
+.game-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .tool-header {
   text-align: left;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
 }
 
 .back-btn {
   background: linear-gradient(145deg, #6c757d, #5a6268);
   color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+  box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -385,19 +409,19 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: 15px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .game-header h2 {
   color: #2c3e50;
   margin: 0;
-  font-size: 2.5em;
+  font-size: 1.8em;
   font-weight: 700;
   text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -405,11 +429,11 @@ onUnmounted(() => {
 .game-info {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 8px;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  padding: 20px;
-  border-radius: 15px;
+  padding: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -417,10 +441,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 15px;
+  padding: 6px 10px;
   background: #f8f9fa;
-  border-radius: 8px;
-  min-width: 60px;
+  border-radius: 6px;
+  min-width: 50px;
 }
 
 .info-label {
@@ -435,31 +459,44 @@ onUnmounted(() => {
   color: #2c3e50;
 }
 
+.difficulty-and-instructions {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  max-width: 1200px;
+  width: 100%;
+}
+
 .difficulty-selection {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 30px;
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
   flex: 1;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .difficulty-selection h3 {
   color: #2c3e50;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   font-size: 2.2em;
   font-weight: 600;
   text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .difficulty-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
   margin-bottom: 30px;
+  justify-items: center;
 }
 
 .difficulty-btn {
+  width: 100%;
+  max-width: 180px;
   padding: 25px;
   border: 2px solid #dee2e6;
   background: linear-gradient(145deg, #ffffff, #f8f9fa);
@@ -530,39 +567,41 @@ onUnmounted(() => {
 
 .game-container {
   display: flex;
-  gap: 30px;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
   flex: 1;
   min-height: 0;
 }
 
 .game-left {
-  flex: 0 0 300px;
+  width: 100%;
+  max-width: 600px;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   gap: 20px;
 }
 
 .game-right {
-  flex: 1;
+  width: 100%;
   display: flex;
   justify-content: center;
 }
 
 .game-board {
   display: grid;
-  gap: 15px;
-  padding: 30px;
+  gap: 8px;
+  padding: 15px;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
-  border-radius: 20px;
+  border-radius: 15px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .card {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   perspective: 1000px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -591,11 +630,11 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: 12px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
@@ -627,19 +666,21 @@ onUnmounted(() => {
 
 .game-controls {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 .control-btn {
-  padding: 12px 24px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 25px;
+  border-radius: 20px;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -769,87 +810,135 @@ onUnmounted(() => {
 }
 
 .game-instructions {
-  margin-top: 30px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #17a2b8;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  height: fit-content;
 }
 
-.game-instructions h4 {
+.instructions-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.instructions-header h4 {
   color: #2c3e50;
-  margin-bottom: 10px;
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.instructions-content {
+  margin-top: 10px;
 }
 
 .game-instructions ul {
+  list-style: none;
+  padding: 0;
   margin: 0;
-  padding-left: 20px;
 }
 
 .game-instructions li {
-  margin-bottom: 5px;
-  color: #495057;
+  padding: 4px 0;
+  color: #34495e;
+  font-size: 0.9em;
+  line-height: 1.4;
+  position: relative;
+  padding-left: 15px;
+}
+
+.game-instructions li:before {
+  content: '•';
+  color: #3498db;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .memory-game {
-    padding: 15px;
+    padding: 10px;
+  }
+  
+  .game-wrapper {
+    max-width: 100%;
+    padding: 0 8px;
+    gap: 8px;
   }
   
   .game-header {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     text-align: center;
+    padding: 15px;
+    margin-bottom: 10px;
   }
   
   .game-info {
     justify-content: center;
   }
   
-  .game-container {
+  .difficulty-and-instructions {
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
+  }
+  
+  .game-container {
+    gap: 15px;
   }
   
   .game-left {
-    flex: none;
-    width: 100%;
+    max-width: 100%;
   }
   
-  .game-right {
-    flex: none;
+  .difficulty-selection {
+    padding: 20px;
+    max-width: 100%;
+  }
+  
+  .game-instructions {
+    padding: 15px;
   }
   
   .difficulty-buttons {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
   }
   
   .card {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
   }
   
   .card-front,
   .card-back {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   .game-controls {
-    flex-direction: row;
     justify-content: center;
+    gap: 8px;
   }
   
   .control-btn {
-    padding: 8px 16px;
-    font-size: 14px;
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 70px;
   }
   
   .game-board {
     max-width: 100%;
     margin: 0 auto;
+    gap: 6px;
+    padding: 12px;
   }
 }
 

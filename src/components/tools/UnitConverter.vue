@@ -8,111 +8,103 @@
       </div>
       
       <div class="converter-body">
-        <!-- 转换类型选择 -->
-        <div class="category-selector">
-          <h3>选择转换类型</h3>
-          <div class="category-buttons">
-            <button 
-              v-for="category in categories" 
-              :key="category.key"
-              @click="selectCategory(category.key)"
-              :class="['category-btn', { active: selectedCategory === category.key }]"
-            >
-              {{ category.icon }} {{ category.name }}
-            </button>
-          </div>
-        </div>
-        
-        <!-- 转换器主体 -->
-        <div class="converter-main" v-if="selectedCategory">
-          <div class="conversion-row">
-            <!-- 输入部分 -->
-            <div class="input-section">
-              <label>从</label>
-              <div class="input-group">
-                <input 
-                  v-model="inputValue" 
-                  type="number" 
-                  placeholder="输入数值"
-                  @input="convert"
-                  class="value-input"
+        <div class="converter-layout">
+          <!-- 左侧：主要转换器 -->
+          <div class="converter-left">
+            <!-- 转换类型选择 -->
+            <div class="category-selector">
+              <h3>选择转换类型</h3>
+              <div class="category-buttons">
+                <button 
+                  v-for="category in categories" 
+                  :key="category.key"
+                  @click="selectCategory(category.key)"
+                  :class="['category-btn', { active: selectedCategory === category.key }]"
                 >
-                <select v-model="fromUnit" @change="convert" class="unit-select">
-                  <option 
-                    v-for="unit in getCurrentUnits()" 
-                    :key="unit.key" 
-                    :value="unit.key"
-                  >
-                    {{ unit.name }} ({{ unit.symbol }})
-                  </option>
-                </select>
+                  {{ category.icon }} {{ category.name }}
+                </button>
               </div>
             </div>
             
-            <!-- 交换按钮 -->
-            <div class="swap-section">
-              <button @click="swapUnits" class="swap-btn" title="交换单位">
-                ⇄
-              </button>
-            </div>
-            
-            <!-- 输出部分 -->
-            <div class="output-section">
-              <label>到</label>
-              <div class="input-group">
-                <input 
-                  v-model="outputValue" 
-                  type="text" 
-                  readonly
-                  class="value-input output"
-                >
-                <select v-model="toUnit" @change="convert" class="unit-select">
-                  <option 
-                    v-for="unit in getCurrentUnits()" 
-                    :key="unit.key" 
-                    :value="unit.key"
-                  >
-                    {{ unit.name }} ({{ unit.symbol }})
-                  </option>
-                </select>
+            <!-- 转换器主体 -->
+            <div class="converter-main" v-if="selectedCategory">
+              <div class="conversion-row">
+                <!-- 输入部分 -->
+                <div class="input-section">
+                  <label>从</label>
+                  <div class="input-group">
+                    <input 
+                      v-model="inputValue" 
+                      type="number" 
+                      placeholder="输入数值"
+                      @input="convert"
+                      class="value-input"
+                    >
+                    <select v-model="fromUnit" @change="convert" class="unit-select">
+                      <option 
+                        v-for="unit in getCurrentUnits()" 
+                        :key="unit.key" 
+                        :value="unit.key"
+                      >
+                        {{ unit.name }} ({{ unit.symbol }})
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                
+                <!-- 交换按钮 -->
+                <div class="swap-section">
+                  <button @click="swapUnits" class="swap-btn" title="交换单位">
+                    ⇄
+                  </button>
+                </div>
+                
+                <!-- 输出部分 -->
+                <div class="output-section">
+                  <label>到</label>
+                  <div class="input-group">
+                    <input 
+                      v-model="outputValue" 
+                      type="text" 
+                      readonly
+                      class="value-input output"
+                    >
+                    <select v-model="toUnit" @change="convert" class="unit-select">
+                      <option 
+                        v-for="unit in getCurrentUnits()" 
+                        :key="unit.key" 
+                        :value="unit.key"
+                      >
+                        {{ unit.name }} ({{ unit.symbol }})
+                      </option>
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           
-          <!-- 常用转换 -->
-          <div class="quick-conversions" v-if="inputValue && !isNaN(inputValue)">
-            <h4>常用转换</h4>
-            <div class="quick-list">
-              <div 
-                v-for="unit in getCurrentUnits().filter(u => u.key !== fromUnit)" 
-                :key="unit.key"
-                class="quick-item"
-                @click="setToUnit(unit.key)"
-              >
-                <span class="quick-value">{{ convertToUnit(unit.key) }}</span>
-                <span class="quick-unit">{{ unit.symbol }}</span>
+          <!-- 右侧：转换历史 -->
+          <div class="converter-right">
+            <!-- 转换历史 -->
+            <div class="history-section" v-if="conversionHistory.length > 0">
+              <h3>转换历史</h3>
+              <div class="history-list">
+                <div 
+                  v-for="(record, index) in conversionHistory.slice(-5)" 
+                  :key="index"
+                  class="history-item"
+                  @click="useHistoryConversion(record)"
+                >
+                  <div class="history-conversion">
+                    {{ record.inputValue }} {{ record.fromUnit }} = {{ record.outputValue }} {{ record.toUnit }}
+                  </div>
+                  <div class="history-category">{{ record.category }}</div>
+                </div>
               </div>
+              <button @click="clearHistory" class="clear-history-btn">清空历史</button>
             </div>
           </div>
-        </div>
-        
-        <!-- 转换历史 -->
-        <div class="history-section" v-if="conversionHistory.length > 0">
-          <h3>转换历史</h3>
-          <div class="history-list">
-            <div 
-              v-for="(record, index) in conversionHistory.slice(-5)" 
-              :key="index"
-              class="history-item"
-              @click="useHistoryConversion(record)"
-            >
-              <div class="history-conversion">
-                {{ record.inputValue }} {{ record.fromUnit }} = {{ record.outputValue }} {{ record.toUnit }}
-              </div>
-              <div class="history-category">{{ record.category }}</div>
-            </div>
-          </div>
-          <button @click="clearHistory" class="clear-history-btn">清空历史</button>
         </div>
       </div>
     </div>
@@ -304,16 +296,7 @@ const formatResult = (value) => {
   }
 }
 
-const convertToUnit = (unitKey) => {
-  if (!inputValue.value || isNaN(inputValue.value)) return ''
-  const result = convertValue(parseFloat(inputValue.value), fromUnit.value, unitKey)
-  return formatResult(result)
-}
 
-const setToUnit = (unitKey) => {
-  toUnit.value = unitKey
-  convert()
-}
 
 const swapUnits = () => {
   const temp = fromUnit.value
@@ -358,22 +341,38 @@ onMounted(() => {
 
 <style scoped>
 .unit-converter {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px;
+  min-height: 100vh;
+  padding: 20px;
   background: linear-gradient(145deg, #ffffff, #f8f9fa);
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  overflow-y: auto;
 }
 
-.converter-container {
+.unit-converter .converter-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
   backdrop-filter: blur(10px);
   border-radius: 25px;
   padding: 40px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.converter-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.converter-left {
+  min-height: 400px;
+}
+
+.converter-right {
+  height: 600px;
+  overflow: hidden;
 }
 
 .tool-header {
@@ -567,58 +566,16 @@ onMounted(() => {
   transform: rotate(180deg);
 }
 
-.quick-conversions {
-  background: #f8f9fa;
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 30px;
-}
 
-.quick-conversions h4 {
-  color: #2c3e50;
-  margin-bottom: 15px;
-  font-size: 16px;
-}
-
-.quick-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-}
-
-.quick-item {
-  padding: 10px;
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-  border: 1px solid #e9ecef;
-}
-
-.quick-item:hover {
-  background: #e3f2fd;
-  border-color: #3498db;
-}
-
-.quick-value {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #2c3e50;
-  margin-bottom: 4px;
-}
-
-.quick-unit {
-  display: block;
-  font-size: 12px;
-  color: #7f8c8d;
-}
 
 .history-section {
   background: #f8f9fa;
   border-radius: 10px;
-  padding: 20px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 .history-section h3 {
@@ -628,9 +585,28 @@ onMounted(() => {
 }
 
 .history-list {
-  max-height: 200px;
   overflow-y: auto;
+  flex: 1;
   margin-bottom: 15px;
+  padding-right: 5px;
+}
+
+.history-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.history-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+.history-list::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .history-item {
@@ -641,6 +617,10 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid #e9ecef;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .history-item:hover {
@@ -675,6 +655,17 @@ onMounted(() => {
   background: #c0392b;
 }
 
+@media (max-width: 1024px) {
+  .converter-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .converter-right {
+    height: 400px;
+  }
+}
+
 @media (max-width: 768px) {
   .conversion-row {
     grid-template-columns: 1fr;
@@ -693,8 +684,8 @@ onMounted(() => {
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .quick-list {
-    grid-template-columns: repeat(2, 1fr);
+  .converter-right {
+    height: 300px;
   }
 }
 </style>

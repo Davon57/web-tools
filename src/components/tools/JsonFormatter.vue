@@ -303,13 +303,15 @@ const removeComments = () => {
 
 <style scoped>
 .tool-container {
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
   padding: 20px;
   background: linear-gradient(145deg, #ffffff, #f8f9fa);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 .tool-header {
@@ -605,6 +607,7 @@ button:disabled {
   font-size: 15px;
   line-height: 1.6;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* margin-bottom: 30px; */
 }
 
 .tools-grid {
@@ -638,23 +641,60 @@ button:disabled {
   color: #7f8c8d;
 }
 
-@media (max-width: 768px) {
+/* 中等屏幕适配 */
+@media (max-width: 1200px) {
+  .formatter-content {
+    gap: 20px;
+  }
+  
+  .input-section, .output-section,
+  .json-tree-section, .tools-section {
+    padding: 25px;
+  }
+}
+
+/* 平板适配 */
+@media (max-width: 992px) {
   .tool-container {
     padding: 15px;
+  }
+  
+  .formatter-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .formatter-left,
+  .formatter-right {
+    flex: none;
+    width: 100%;
+  }
+  
+  .tool-title {
+    font-size: 2.5rem;
+  }
+}
+
+/* 手机适配 */
+@media (max-width: 768px) {
+  .tool-container {
+    padding: 10px;
   }
 
   .formatter-content {
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
   }
 
   .formatter-left,
   .formatter-right {
     flex: none;
+    width: 100%;
   }
 
   .json-textarea {
     min-height: 200px;
+    font-size: 14px;
   }
 
   .tool-title {
@@ -666,17 +706,50 @@ button:disabled {
   .output-section,
   .json-tree-section,
   .tools-section {
-    padding: 20px;
+    padding: 15px;
   }
 
-  .btn-group {
+  .input-actions, .output-actions {
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
   }
 
-  .btn-group button {
+  .format-btn, .minify-btn, .copy-btn, .download-btn, 
+  .validate-btn, .clear-btn, .sample-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+    margin-right: 0;
+    margin-bottom: 8px;
     flex: 1;
-    min-width: 120px;
+    min-width: 100px;
+  }
+  
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 小屏手机适配 */
+@media (max-width: 480px) {
+  .tool-container {
+    padding: 8px;
+  }
+  
+  .tool-title {
+    font-size: 1.8rem;
+  }
+  
+  .input-section,
+  .output-section,
+  .json-tree-section,
+  .tools-section {
+    padding: 12px;
+  }
+  
+  .json-textarea {
+    min-height: 180px;
+    padding: 15px;
+    font-size: 13px;
   }
 }
 </style>

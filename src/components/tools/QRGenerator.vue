@@ -252,28 +252,7 @@
             </div>
           </div>
           
-          <!-- 生成历史 -->
-          <div class="history-section" v-if="qrHistory.length > 0">
-            <h3>生成历史</h3>
-            <div class="history-list">
-              <div 
-                v-for="(record, index) in qrHistory.slice(-6)" 
-                :key="index"
-                class="history-item"
-                @click="useHistoryRecord(record)"
-              >
-                <div class="history-qr">
-                  <img :src="record.dataURL" alt="历史二维码" class="history-qr-image">
-                </div>
-                <div class="history-info">
-                  <div class="history-type">{{ getTypeName(record.type) }}</div>
-                  <div class="history-content">{{ record.preview }}</div>
-                  <div class="history-time">{{ formatTime(record.timestamp) }}</div>
-                </div>
-              </div>
-            </div>
-            <button @click="clearHistory" class="clear-history-btn">清空历史</button>
-          </div>
+
         </div>
       </div>
     </div>
@@ -288,7 +267,6 @@ const selectedType = ref('text')
 const textContent = ref('')
 const urlContent = ref('')
 const qrDataURL = ref('')
-const qrHistory = ref([])
 
 const wifiData = ref({
   ssid: '',
@@ -385,32 +363,6 @@ const generateQR = async () => {
     const url = `https://api.qrserver.com/v1/create-qr-code/?${params.toString()}`
     qrDataURL.value = url
     
-    // 添加到历史记录
-    const historyRecord = {
-      type: selectedType.value,
-      content: content,
-      preview: getPreviewContent(),
-      dataURL: url,
-      timestamp: Date.now(),
-      settings: { ...qrSettings.value }
-    }
-    
-    // 避免重复添加相同内容
-    const existingIndex = qrHistory.value.findIndex(item => 
-      item.type === selectedType.value && item.content === content
-    )
-    
-    if (existingIndex >= 0) {
-      qrHistory.value.splice(existingIndex, 1)
-    }
-    
-    qrHistory.value.push(historyRecord)
-    
-    // 限制历史记录数量
-    if (qrHistory.value.length > 20) {
-      qrHistory.value = qrHistory.value.slice(-20)
-    }
-    
   } catch (error) {
     console.error('生成二维码失败:', error)
   }
@@ -450,50 +402,7 @@ const copyQRToClipboard = async () => {
   }
 }
 
-const useHistoryRecord = (record) => {
-  selectedType.value = record.type
-  qrSettings.value = { ...record.settings }
-  
-  // 根据类型设置对应的数据
-  switch (record.type) {
-    case 'text':
-      textContent.value = record.content
-      break
-    case 'url':
-      urlContent.value = record.content
-      break
-    // WiFi, contact, email 的数据恢复比较复杂，这里简化处理
-    default:
-      break
-  }
-  
-  qrDataURL.value = record.dataURL
-}
 
-const getTypeName = (type) => {
-  const typeObj = qrTypes.find(t => t.key === type)
-  return typeObj ? typeObj.name : type
-}
-
-const formatTime = (timestamp) => {
-  const date = new Date(timestamp)
-  const now = new Date()
-  const diff = now - date
-  
-  if (diff < 60000) {
-    return '刚刚'
-  } else if (diff < 3600000) {
-    return `${Math.floor(diff / 60000)}分钟前`
-  } else if (diff < 86400000) {
-    return `${Math.floor(diff / 3600000)}小时前`
-  } else {
-    return date.toLocaleDateString()
-  }
-}
-
-const clearHistory = () => {
-  qrHistory.value = []
-}
 
 onMounted(() => {
   // 默认生成示例二维码
@@ -587,6 +496,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .type-selector {
@@ -718,7 +629,9 @@ select:focus {
   border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  flex: 1;
+  flex: 0 0 auto;
+  max-height: 75vh;
+  overflow-y: auto;
 }
 
 .qr-settings h3 {
@@ -840,100 +753,7 @@ select:focus {
   margin-bottom: 10px;
 }
 
-.history-section {
-  background: linear-gradient(145deg, #ffffff, #f8f9fa);
-  border-radius: 15px;
-  padding: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
 
-.history-section h3 {
-  color: #2c3e50;
-  margin-bottom: 20px;
-  font-size: 18px;
-}
-
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-}
-
-.history-item {
-  display: flex;
-  gap: 15px;
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid #e9ecef;
-}
-
-.history-item:hover {
-  background: #e3f2fd;
-  border-color: #3498db;
-}
-
-.history-qr {
-  flex-shrink: 0;
-}
-
-.history-qr-image {
-  width: 60px;
-  height: 60px;
-  border-radius: 6px;
-}
-
-.history-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.history-type {
-  font-size: 12px;
-  color: #3498db;
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.history-content {
-  font-size: 14px;
-  color: #2c3e50;
-  margin-bottom: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.history-time {
-  font-size: 12px;
-  color: #7f8c8d;
-}
-
-.clear-history-btn {
-  width: 100%;
-  padding: 10px;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s ease;
-}
-
-.clear-history-btn:hover {
-  background: #c0392b;
-}
 
 @media (max-width: 768px) {
   .qr-generator {

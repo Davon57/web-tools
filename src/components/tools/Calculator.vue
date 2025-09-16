@@ -3,7 +3,7 @@
     <div class="calculator-container">
       <div class="tool-header">
         <button @click="$router.push('/')" class="back-btn">← 返回主页</button>
-        <h2 class="tool-title">🧮 计算器</h2>
+        <h2 class="tool-title"><span class="tool-icon">🧮</span> <span class="tool-text">计算器</span></h2>
         <p class="tool-description">基础数学计算工具，支持加减乘除等运算</p>
       </div>
       
@@ -270,20 +270,41 @@ const clearHistory = () => {
 
 .tool-title {
   font-size: 3em;
-  color: white;
   margin-bottom: 40px;
   text-align: center;
   font-weight: 700;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.tool-icon {
+  font-size: 1em;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  margin-bottom: 0;
+}
+
+.tool-text {
+  color: #2c3e50;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tool-description {
-  color: rgba(255, 255, 255, 0.9);
+  color: #6c757d;
   text-align: center;
   margin-bottom: 30px;
   font-size: 1.1em;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 .calculator-body {
@@ -366,14 +387,16 @@ const clearHistory = () => {
 }
 
 .btn-number {
-  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
   color: #2c3e50;
-  font-weight: 500;
+  font-weight: 600;
+  border: 2px solid rgba(44, 62, 80, 0.1);
 }
 
 .btn-number:hover {
-  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  background: linear-gradient(145deg, #e9ecef, #dee2e6);
   color: #1a252f;
+  border-color: rgba(44, 62, 80, 0.2);
 }
 
 .btn-operator {

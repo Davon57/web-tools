@@ -72,8 +72,22 @@
       </div>
     </div>
         
-        <div class="common-patterns">
+        <div class="common-patterns-section">
+          <button @click="showPatternsModal = true" class="patterns-btn">
+            <i>📋</i> 常用正则表达式
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 常用正则表达式弹窗 -->
+    <div v-if="showPatternsModal" class="modal-overlay" @click="showPatternsModal = false">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
           <h3>常用正则表达式</h3>
+          <button @click="showPatternsModal = false" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
           <div class="patterns-grid">
             <div v-for="pattern in commonPatterns" :key="pattern.name" class="pattern-item" @click="usePattern(pattern)">
               <div class="pattern-name">{{ pattern.name }}</div>
@@ -101,6 +115,7 @@ const flags = ref({
 })
 const matches = ref([])
 const error = ref('')
+const showPatternsModal = ref(false)
 
 const commonPatterns = [
   { name: '邮箱', regex: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}', description: '匹配邮箱地址' },
@@ -177,18 +192,20 @@ const highlightedText = computed(() => {
 const usePattern = (pattern) => {
   regexPattern.value = pattern.regex
   testRegex()
+  showPatternsModal.value = false
 }
 </script>
 
 <style scoped>
 .tool-container {
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
   min-height: 100vh;
-  padding: 20px;
+  padding: 20px 20px 30px 20px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.95));
   backdrop-filter: blur(10px);
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -258,7 +275,17 @@ const usePattern = (pattern) => {
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.regex-section, .test-text-section, .results-section, .common-patterns {
+.regex-section {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.test-text-section, .results-section, .common-patterns {
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
   backdrop-filter: blur(10px);
   padding: 25px;
@@ -390,12 +417,17 @@ const usePattern = (pattern) => {
 
 .match-groups {
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
 }
 
 .match-group {
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .group-label {
@@ -407,10 +439,13 @@ const usePattern = (pattern) => {
   font-family: 'Fira Code', 'Courier New', monospace;
   background: linear-gradient(145deg, rgba(243, 229, 245, 0.9), rgba(233, 213, 255, 0.9));
   backdrop-filter: blur(3px);
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 8px;
-  margin-left: 15px;
   border: 1px solid rgba(142, 68, 173, 0.3);
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: 14px;
 }
 
@@ -496,6 +531,131 @@ const usePattern = (pattern) => {
   color: #7f8c8d;
 }
 
+.common-patterns-section {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.patterns-btn {
+  background: linear-gradient(145deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.patterns-btn:hover {
+  background: linear-gradient(145deg, #0056b3, #004085);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 12px 25px rgba(0, 123, 255, 0.4);
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.95));
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  max-width: 90vw;
+  max-height: 80vh;
+  width: 800px;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 30px;
+  border-bottom: 1px solid rgba(222, 226, 230, 0.5);
+  background: linear-gradient(145deg, rgba(248, 249, 250, 0.9), rgba(233, 236, 239, 0.9));
+}
+
+.modal-header h3 {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6c757d;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  transform: scale(1.1);
+}
+
+.modal-body {
+  padding: 30px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-body .patterns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.modal-body .pattern-item {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 250, 0.9));
+  backdrop-filter: blur(10px);
+  padding: 25px;
+  border-radius: 18px;
+  border: 2px solid rgba(222, 226, 230, 0.5);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modal-body .pattern-item:hover {
+  border-color: rgba(0, 123, 255, 0.8);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 123, 255, 0.2);
+  background: linear-gradient(145deg, rgba(227, 242, 253, 0.9), rgba(187, 222, 251, 0.9));
+}
+
 @media (max-width: 768px) {
   .tool-container {
     padding: 15px;
@@ -514,7 +674,7 @@ const usePattern = (pattern) => {
     overflow-y: visible;
   }
   
-  .regex-section, .test-text-section, .results-section, .common-patterns {
+  .regex-section, .test-text-section, .results-section {
     padding: 20px;
   }
   
@@ -526,8 +686,28 @@ const usePattern = (pattern) => {
     min-height: 150px;
   }
   
-  .patterns-grid {
+  .modal-content {
+    width: 95vw;
+    max-height: 85vh;
+  }
+  
+  .modal-body .patterns-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .patterns-btn {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+  
+  .match-groups {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .group-content {
+    max-width: none;
+    white-space: normal;
   }
 }
 </style>
