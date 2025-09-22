@@ -10,6 +10,9 @@ import MemoryGame from '@/components/tools/MemoryGame.vue'
 import ImageToBase64 from '@/components/tools/ImageToBase64.vue'
 import CodeSnippets from '@/components/tools/CodeSnippets.vue'
 import OCRTool from '@/components/tools/OCRTool.vue'
+import ImageCompressor from '@/components/tools/ImageCompressor.vue'
+import FullscreenTodo from '@/components/tools/FullscreenTodo.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -71,6 +74,21 @@ const router = createRouter({
       path: '/ocr-tool',
       name: 'OCRTool',
       component: OCRTool
+    },
+    {
+      path: '/image-compressor',
+      name: 'ImageCompressor',
+      component: ImageCompressor
+    },
+    {
+      path: '/todo-kanban',
+      name: 'TodoKanban',
+      component: FullscreenTodo
+    },
+    {
+      path: '/fullscreen-todo',
+      name: 'FullscreenTodo',
+      component: FullscreenTodo
     }
   ],
 })

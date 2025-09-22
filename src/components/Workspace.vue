@@ -138,13 +138,15 @@ const systemTools = ref([
   { id: 'calculator', name: '计算器', icon: '🧮', component: 'Calculator' },
   { id: 'unit', name: '单位转换', icon: '📏', component: 'UnitConverter' },
   { id: 'base64', name: 'Base64', icon: '🔄', component: 'ImageToBase64' },
+  { id: 'image-compressor', name: '图片压缩', icon: '🗜️', component: 'ImageCompressor' },
   { id: 'qrcode', name: '二维码生成', icon: '📱', component: 'QRGenerator' },
   { id: 'color', name: '颜色工具', icon: '🎨', component: 'ColorPicker' },
   { id: 'json', name: 'JSON', icon: '📋', component: 'JsonFormatter' },
   { id: 'regex', name: '正则测试', icon: '🔍', component: 'RegexTester' },
   { id: 'code-snippets', name: '常用代码', icon: '💻', component: 'CodeSnippets' },
   { id: 'ocr', name: 'OCR识别', icon: '👁️', component: 'OCRTool' },
-  { id: 'memory', name: '记忆游戏', icon: '🧠', component: 'MemoryGame' }
+  { id: 'memory', name: '记忆游戏', icon: '🧠', component: 'MemoryGame' },
+  { id: 'todo', name: '待办事项', icon: '📝', component: 'FullscreenTodo' }
 ])
 
 // 网站分类数据
@@ -1669,7 +1671,9 @@ const openTool = (tool) => {
     'code-snippets': '/code-snippets',
     'unit': '/unit-converter',
     'memory': '/memory-game',
-    'ocr': '/ocr-tool'
+    'ocr': '/ocr-tool',
+    'image-compressor': '/image-compressor',
+    'todo': '/todo-kanban'
   }
   
   const route = routeMap[tool.id]
