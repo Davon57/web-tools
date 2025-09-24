@@ -12,6 +12,7 @@ import CodeSnippets from '@/components/tools/CodeSnippets.vue'
 import OCRTool from '@/components/tools/OCRTool.vue'
 import ImageCompressor from '@/components/tools/ImageCompressor.vue'
 import FullscreenTodo from '@/components/tools/FullscreenTodo.vue'
+import CodeImageGenerator from '@/components/tools/CodeImageGenerator.vue'
 
 
 const router = createRouter({
@@ -46,7 +47,12 @@ const router = createRouter({
     {
       path: '/memory-game',
       name: 'MemoryGame',
-      component: MemoryGame
+      component: () => import('../components/tools/MemoryGame.vue')
+    },
+    {
+      path: '/whiteboard',
+      name: 'Whiteboard',
+      component: () => import('../components/tools/Whiteboard.vue')
     },
 
     {
@@ -89,6 +95,11 @@ const router = createRouter({
       path: '/fullscreen-todo',
       name: 'FullscreenTodo',
       component: FullscreenTodo
+    },
+    {
+      path: '/code-image-generator',
+      name: 'CodeImageGenerator',
+      component: CodeImageGenerator
     }
   ],
 })

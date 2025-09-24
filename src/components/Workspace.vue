@@ -144,8 +144,10 @@ const systemTools = ref([
   { id: 'json', name: 'JSON', icon: '📋', component: 'JsonFormatter' },
   { id: 'regex', name: '正则测试', icon: '🔍', component: 'RegexTester' },
   { id: 'code-snippets', name: '常用代码', icon: '💻', component: 'CodeSnippets' },
+  { id: 'code-image', name: '代码图片', icon: '📸', component: 'CodeImageGenerator' },
   { id: 'ocr', name: 'OCR识别', icon: '👁️', component: 'OCRTool' },
   { id: 'memory', name: '记忆游戏', icon: '🧠', component: 'MemoryGame' },
+  { id: 'whiteboard', name: '在线白板', icon: '🎨', component: 'Whiteboard' },
   { id: 'todo', name: '待办事项', icon: '📝', component: 'FullscreenTodo' }
 ])
 
@@ -1669,11 +1671,13 @@ const openTool = (tool) => {
     'json': '/json-formatter',
     'regex': '/regex-tester',
     'code-snippets': '/code-snippets',
+    'code-image': '/code-image-generator',
     'unit': '/unit-converter',
     'memory': '/memory-game',
     'ocr': '/ocr-tool',
     'image-compressor': '/image-compressor',
-    'todo': '/todo-kanban'
+    'todo': '/todo-kanban',
+    'whiteboard': '/whiteboard'
   }
   
   const route = routeMap[tool.id]
