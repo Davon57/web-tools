@@ -52,13 +52,14 @@ export default defineConfig({
     // 生成 source map 用于生产环境调试
     sourcemap: true
   },
-  // 预加载优化
-  experimental: {
-    renderBuiltUrl(filename, { hostType }) {
-      if (hostType === 'js') {
-        // 对 JS 文件启用预加载
-        return { runtime: `window.__assetsPath(${JSON.stringify(filename)})` }
-      }
-    }
-  }
+  // 预加载优化 - 移除有问题的 renderBuiltUrl 配置
+  // experimental.renderBuiltUrl 的 runtime 选项需要预定义的全局函数
+  // 暂时移除此配置，使用默认的资源路径处理
+  // experimental: {
+  //   renderBuiltUrl(filename, { hostType }) {
+  //     if (hostType === 'js') {
+  //       return { runtime: `window.__assetsPath(${JSON.stringify(filename)})` }
+  //     }
+  //   }
+  // }
 })
