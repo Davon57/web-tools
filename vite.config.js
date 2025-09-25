@@ -27,7 +27,8 @@ export default defineConfig({
     include: [
       'react',
       'react-dom/client',
-      'tldraw',
+      'konva',
+      'react-konva',
       'element-plus'
     ],
     // 强制预构建这些依赖
@@ -42,7 +43,7 @@ export default defineConfig({
         // 手动分包，将大型依赖单独打包
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
-          'tldraw-vendor': ['tldraw'],
+          'konva-vendor': ['konva', 'react-konva'],
           'element-plus-vendor': ['element-plus']
         }
       }

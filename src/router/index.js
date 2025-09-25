@@ -52,7 +52,7 @@ const router = createRouter({
     {
       path: '/whiteboard',
       name: 'Whiteboard',
-      component: () => import('../components/tools/Whiteboard.vue')
+      component: () => import('../components/tools/KonvaWhiteboard.vue')
     },
 
     {
