@@ -148,7 +148,8 @@ const systemTools = ref([
   { id: 'ocr', name: 'OCR识别', icon: '👁️', component: 'OCRTool' },
   { id: 'memory', name: '记忆游戏', icon: '🧠', component: 'MemoryGame' },
   { id: 'whiteboard', name: '在线白板', icon: '🎨', component: 'Whiteboard' },
-  { id: 'todo', name: '待办事项', icon: '📝', component: 'FullscreenTodo' }
+  { id: 'todo', name: '待办事项', icon: '📝', component: 'FullscreenTodo' },
+  { id: 'markdown-editor', name: 'Markdown', icon: '📝', component: 'MarkdownEditor' }
 ])
 
 // 网站分类数据
@@ -1677,7 +1678,8 @@ const openTool = (tool) => {
     'ocr': '/ocr-tool',
     'image-compressor': '/image-compressor',
     'todo': '/todo-kanban',
-    'whiteboard': '/whiteboard'
+    'whiteboard': '/whiteboard',
+    'markdown-editor': '/markdown-editor'
   }
   
   const route = routeMap[tool.id]
