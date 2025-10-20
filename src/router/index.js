@@ -80,6 +80,41 @@ const routes = [
     path: '/todo-kanban',
     name: 'FullscreenTodo',
     component: () => import('../components/tools/FullscreenTodo.vue')
+  },
+  {
+    path: '/recipe-system',
+    name: 'RecipeSystem',
+    component: () => import('../components/tools/RecipeSystem.vue')
+  },
+  {
+    path: '/programming-nav',
+    name: 'ProgrammingNav',
+    component: () => import('../components/ProgrammingNav.vue')
+  },
+  {
+    path: '/meme-maker',
+    name: 'MemeMaker',
+    component: () => import('../components/tools/MemeMaker.vue')
+  },
+  {
+    path: '/csv-json-table',
+    name: 'CsvJsonTable',
+    component: () => import('../components/tools/CsvJsonTable.vue')
+  },
+  {
+    path: '/code-runner',
+    name: 'CodeRunner',
+    component: () => import('../components/tools/CodeRunner.vue')
+  },
+  {
+    path: '/password-strength-checker',
+    name: 'PasswordStrengthChecker',
+    component: () => import('../components/tools/PasswordStrengthChecker.vue')
+  },
+  {
+    path: '/jwt-decoder',
+    name: 'JWTDecoder',
+    component: () => import('../components/tools/JWTDecoder.vue')
   }
 ]
 

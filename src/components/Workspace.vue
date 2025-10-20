@@ -1,106 +1,53 @@
 <template>
   <div class="workspace">
-    <!-- 左侧网站链接区域 -->
-    <div class="left-section">
-      <div class="website-categories">
-        <div class="category-tabs">
-          <button 
-            v-for="category in websiteCategories" 
-            :key="category.id"
-            :class="['tab-button', { active: activeCategory === category.id }]"
-            @click="activeCategory = category.id"
-          >
-            <span class="category-icon">{{ category.icon }}</span>
-            {{ category.name }}
-          </button>
-        </div>
-        
-        <!-- 如果当前分类有子分类，显示子分类结构 -->
-        <div v-if="currentCategory && currentCategory.subcategories" class="subcategories-container">
-          <div 
-            v-for="subcategory in currentCategory.subcategories" 
-            :key="subcategory.id"
-            class="subcategory-section"
-          >
-            <div class="subcategory-header">
-              <span class="subcategory-icon">{{ subcategory.icon }}</span>
-              <h3 class="subcategory-title">{{ subcategory.name }}</h3>
-            </div>
-            <div class="website-grid">
-              <div 
-                v-for="website in subcategory.websites" 
-                :key="website.id"
-                class="website-card"
-                @click="openWebsite(website.url)"
-              >
-                <div class="card-header">
-                  <div class="website-icon">{{ website.icon }}</div>
-                  <div class="website-info">
-                    <h3 class="website-name">{{ website.name }}</h3>
-                    <span class="website-version" v-if="website.version">{{ website.version }}</span>
-                  </div>
-                </div>
-                <p class="website-description">{{ website.description }}</p>
-                <div class="card-footer">
-                  <span class="website-url">{{ website.displayUrl }}</span>
-                  <div class="external-link-icon">🔗</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 如果当前分类没有子分类，显示扁平的网站列表 -->
-        <div v-else class="website-grid">
-          <div 
-            v-for="website in currentCategoryWebsites" 
-            :key="website.id"
-            class="website-card"
-            @click="openWebsite(website.url)"
-          >
-            <div class="card-header">
-              <div class="website-icon">{{ website.icon }}</div>
-              <div class="website-info">
-                <h3 class="website-name">{{ website.name }}</h3>
-                <span class="website-version" v-if="website.version">{{ website.version }}</span>
-              </div>
-            </div>
-            <p class="website-description">{{ website.description }}</p>
-            <div class="card-footer">
-              <span class="website-url">{{ website.displayUrl }}</span>
-              <div class="external-link-icon">🔗</div>
-            </div>
-          </div>
-        </div>
+    <!-- 时间问候语区域 -->
+    <div class="greeting-section">
+      <div class="time-display">
+        <div class="current-time">{{ currentTime }}</div>
+        <div class="current-date">{{ currentDate }}</div>
+      </div>
+      <div class="greeting-content">
+        <p class="quote-text">{{ motivationalQuote }}</p>
       </div>
     </div>
 
-    <!-- 右侧区域 -->
-    <div class="right-section">
-      <!-- 时间问候语区域 -->
-      <div class="greeting-section">
-        <div class="time-display">
-          <div class="current-time">{{ currentTime }}</div>
-          <div class="current-date">{{ currentDate }}</div>
+    <!-- 工具分类卡片区域 -->
+    <div class="categories-container">
+      <div 
+        v-for="category in toolCategories" 
+        :key="category.id"
+        class="category-card"
+      >
+        <div class="category-header">
+          <span class="category-icon">{{ category.icon }}</span>
+          <h3 class="category-title">{{ category.name }}</h3>
         </div>
-        <div class="greeting-content">
-          <p class="quote-text">{{ motivationalQuote }}</p>
-        </div>
-      </div>
-
-      <!-- 系统工具/小应用区域 -->
-      <div class="tools-section">
-        <h3 class="section-title">系统工具</h3>
+        
         <div class="tools-grid">
-          <div 
-            v-for="tool in systemTools" 
-            :key="tool.id"
-            class="tool-card"
-            @click="openTool(tool)"
-          >
-            <div class="tool-icon">{{ tool.icon }}</div>
-            <div class="tool-name">{{ tool.name }}</div>
-          </div>
+          <!-- 如果有子分类，展示所有子分类的工具 -->
+          <template v-if="category.subcategories">
+            <div 
+              v-for="tool in getAllToolsFromCategory(category)" 
+              :key="tool.id"
+              class="tool-card"
+              @click="openTool(tool)"
+            >
+              <div class="tool-icon">{{ tool.icon }}</div>
+              <div class="tool-name">{{ tool.name }}</div>
+            </div>
+          </template>
+          <!-- 如果没有子分类，直接展示工具 -->
+          <template v-else>
+            <div 
+              v-for="tool in category.tools" 
+              :key="tool.id"
+              class="tool-card"
+              @click="openTool(tool)"
+            >
+              <div class="tool-icon">{{ tool.icon }}</div>
+              <div class="tool-name">{{ tool.name }}</div>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -133,24 +80,167 @@ const fallbackQuotes = [
   { text: '编程不仅是技术，更是一种思维方式和解决问题的艺术。', author: '艾伦·凯' }
 ]
 
-// 系统工具数据
-const systemTools = ref([
-  { id: 'calculator', name: '计算器', icon: '🧮', component: 'Calculator' },
-  { id: 'unit', name: '单位转换', icon: '📏', component: 'UnitConverter' },
-  { id: 'base64', name: 'Base64', icon: '🔄', component: 'ImageToBase64' },
-  { id: 'image-compressor', name: '图片压缩', icon: '🗜️', component: 'ImageCompressor' },
-  { id: 'qrcode', name: '二维码生成', icon: '📱', component: 'QRGenerator' },
-  { id: 'color', name: '颜色工具', icon: '🎨', component: 'ColorPicker' },
-  { id: 'json', name: 'JSON', icon: '📋', component: 'JsonFormatter' },
-  { id: 'regex', name: '正则测试', icon: '🔍', component: 'RegexTester' },
-  { id: 'code-snippets', name: '常用代码', icon: '💻', component: 'CodeSnippets' },
-  { id: 'code-image', name: '代码图片', icon: '📸', component: 'CodeImageGenerator' },
-  { id: 'ocr', name: 'OCR识别', icon: '👁️', component: 'OCRTool' },
-  { id: 'memory', name: '记忆游戏', icon: '🧠', component: 'MemoryGame' },
-  { id: 'whiteboard', name: '在线白板', icon: '🎨', component: 'Whiteboard' },
-  { id: 'todo', name: '待办事项', icon: '📝', component: 'FullscreenTodo' },
-  { id: 'markdown-editor', name: 'Markdown', icon: '📝', component: 'MarkdownEditor' }
+// 工具分类数据
+const toolCategories = ref([
+  {
+    id: 'system-tools',
+    name: '系统工具',
+    icon: '⚙️',
+    subcategories: [
+      {
+        id: 'programming',
+        name: '编程',
+        icon: '💻',
+        tools: [
+          { id: 'programming-nav', name: '编程导航', icon: '🧭', component: 'ProgrammingNav' }
+        ],
+        websites: [
+          {
+            id: 'vue2',
+            name: 'Vue.js 2',
+            version: 'v2.x',
+            icon: '💚',
+            url: 'https://v2.vuejs.org/',
+            displayUrl: 'v2.vuejs.org',
+            description: 'Vue.js 2.x 官方文档，渐进式JavaScript框架'
+          },
+          {
+            id: 'vue3',
+            name: 'Vue.js 3',
+            version: 'v3.x',
+            icon: '💚',
+            url: 'https://vuejs.org/',
+            displayUrl: 'vuejs.org',
+            description: 'Vue.js 3.x 官方文档，现代化的渐进式框架'
+          },
+          {
+            id: 'react',
+            name: 'React',
+            version: 'v18.x',
+            icon: '⚛️',
+            url: 'https://react.dev/',
+            displayUrl: 'react.dev',
+            description: '用于构建用户界面的JavaScript库'
+          },
+          {
+            id: 'angular',
+            name: 'Angular',
+            version: 'v17.x',
+            icon: '🅰️',
+            url: 'https://angular.io/',
+            displayUrl: 'angular.io',
+            description: '现代化的Web应用开发平台'
+          },
+          {
+            id: 'nodejs',
+            name: 'Node.js',
+            version: 'v20.x',
+            icon: '🟢',
+            url: 'https://nodejs.org/',
+            displayUrl: 'nodejs.org',
+            description: 'JavaScript运行时环境'
+          },
+          {
+            id: 'express',
+            name: 'Express.js',
+            version: 'v4.x',
+            icon: '🚂',
+            url: 'https://expressjs.com/',
+            displayUrl: 'expressjs.com',
+            description: '快速、开放、极简的Node.js Web框架'
+          }
+        ]
+      },
+      {
+        id: 'productivity',
+        name: '效率工具',
+        icon: '📋',
+        tools: [
+          { id: 'todo', name: '待办事项', icon: '📝', component: 'FullscreenTodo' },
+          { id: 'whiteboard', name: '在线白板', icon: '🎨', component: 'Whiteboard' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'calculation-conversion',
+    name: '计算与转换工具',
+    icon: '🧮',
+    tools: [
+      { id: 'calculator', name: '计算器', icon: '🧮', component: 'Calculator' },
+      { id: 'unit', name: '单位转换', icon: '📏', component: 'UnitConverter' }
+    ]
+  },
+  {
+    id: 'text-processing',
+    name: '文本处理工具',
+    icon: '📝',
+    tools: [
+      { id: 'base64', name: 'Base64', icon: '🔄', component: 'ImageToBase64' },
+      { id: 'json', name: 'JSON', icon: '📋', component: 'JsonFormatter' },
+      { id: 'regex', name: '正则', icon: '🔍', component: 'RegexTester' },
+      { id: 'markdown-editor', name: 'Markdown', icon: '📝', component: 'MarkdownEditor' }
+    ]
+  },
+  {
+    id: 'image-multimedia',
+    name: '图像与多媒体工具',
+    icon: '🎨',
+    tools: [
+      { id: 'image-compressor', name: '图片压缩', icon: '🗜️', component: 'ImageCompressor' },
+      { id: 'color', name: '颜色工具', icon: '🎨', component: 'ColorPicker' },
+      { id: 'qrcode', name: '二维码生成', icon: '📱', component: 'QRGenerator' },
+      { id: 'code-image', name: '代码转图片', icon: '📸', component: 'CodeImageGenerator' },
+      { id: 'ocr', name: 'OCR识别', icon: '👁️', component: 'OCRTool' }
+    ]
+  },
+  {
+    id: 'encryption-security',
+    name: '加密与安全工具',
+    icon: '🔐',
+    tools: [
+      { id: 'password-strength-checker', name: '密码强度检测', icon: '🔐', component: 'PasswordStrengthChecker' },
+      { id: 'jwt-decoder', name: 'JWT解码器', icon: '🔓', component: 'JWTDecoder' }
+    ]
+  },
+  {
+    id: 'development-debug',
+    name: '开发与调试工具',
+    icon: '🛠️',
+    tools: [
+      { id: 'code-snippets', name: '常用代码', icon: '💻', component: 'CodeSnippets' },
+      { id: 'code-runner', name: 'JS代码运行器', icon: '⚡', component: 'CodeRunner' }
+    ]
+  },
+  {
+    id: 'creative-fun',
+    name: '创意与趣味工具',
+    icon: '🎮',
+    tools: [
+      { id: 'memory', name: '记忆游戏', icon: '🧠', component: 'MemoryGame' },
+      { id: 'recipe-system', name: '智能菜谱', icon: '🍳', component: 'RecipeSystem' },
+      { id: 'meme-maker', name: '表情包制作', icon: '😂', component: 'MemeMaker' }
+    ]
+  },
+  {
+    id: 'data-visualization',
+    name: '数据与可视化工具',
+    icon: '📊',
+    tools: [
+      {
+        id: 'csv-json-table',
+        name: 'CSV/JSON转表格',
+        icon: '📋',
+        url: '/csv-json-table',
+        displayUrl: 'CSV/JSON转表格',
+        description: '将CSV或JSON数据文件转换为可交互的HTML表格，支持排序、筛选和分页'
+      }
+    ]
+  }
 ])
+
+// 当前活动的工具分类
+const activeToolCategory = ref('calculation-conversion')
 
 // 网站分类数据
 const websiteCategories = ref([
@@ -1638,6 +1728,11 @@ const currentCategory = computed(() => {
   return websiteCategories.value.find(cat => cat.id === activeCategory.value)
 })
 
+// 计算属性：当前工具分类对象
+const currentCategoryTools = computed(() => {
+  return toolCategories.value.find(cat => cat.id === activeToolCategory.value) || {}
+})
+
 // 计算属性：当前分类的网站
 const currentCategoryWebsites = computed(() => {
   const category = currentCategory.value
@@ -1650,6 +1745,29 @@ const currentCategoryWebsites = computed(() => {
   
   // 否则返回直接的websites
   return category.websites || []
+})
+
+// 计算属性：系统工具（用于右侧区域显示）
+const systemToolsOnly = computed(() => {
+  const systemCategory = toolCategories.value.find(cat => cat.id === 'system-tools')
+  if (!systemCategory || !systemCategory.subcategories) return []
+  
+  // 返回所有子分类的工具
+  return systemCategory.subcategories.flatMap(sub => sub.tools || [])
+})
+
+// 计算属性：非系统工具分类（用于左侧区域显示）
+const nonSystemCategories = computed(() => {
+  return toolCategories.value.filter(cat => cat.id !== 'system-tools')
+})
+
+// 计算属性：当前分类的所有工具（包括子分类的工具）
+const allCurrentCategoryTools = computed(() => {
+  const category = currentCategoryTools.value
+  if (!category || !category.subcategories) return []
+  
+  // 返回所有子分类的工具
+  return category.subcategories.flatMap(sub => sub.tools || [])
 })
 
 // 打开网站
@@ -1672,6 +1790,7 @@ const openTool = (tool) => {
     'json': '/json-formatter',
     'regex': '/regex-tester',
     'code-snippets': '/code-snippets',
+    'code-runner': '/code-runner',
     'code-image': '/code-image-generator',
     'unit': '/unit-converter',
     'memory': '/memory-game',
@@ -1679,7 +1798,13 @@ const openTool = (tool) => {
     'image-compressor': '/image-compressor',
     'todo': '/todo-kanban',
     'whiteboard': '/whiteboard',
-    'markdown-editor': '/markdown-editor'
+    'markdown-editor': '/markdown-editor',
+    'recipe-system': '/recipe-system',
+    'programming-nav': '/programming-nav',
+    'meme-maker': '/meme-maker',
+    'csv-json-table': '/csv-json-table',
+    'password-strength-checker': '/password-strength-checker',
+    'jwt-decoder': '/jwt-decoder'
   }
   
   const route = routeMap[tool.id]
@@ -1688,6 +1813,21 @@ const openTool = (tool) => {
   } else {
     console.warn('未找到对应的路由:', tool.id)
   }
+}
+
+// 获取分类下的所有工具（包括子分类工具）
+const getAllToolsFromCategory = (category) => {
+  if (!category.subcategories) {
+    return category.tools || []
+  }
+  
+  let allTools = []
+  category.subcategories.forEach(subcategory => {
+    if (subcategory.tools) {
+      allTools = allTools.concat(subcategory.tools)
+    }
+  })
+  return allTools
 }
 
 // 组件挂载时
@@ -1717,25 +1857,9 @@ onUnmounted(() => {
   padding: 2rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
+  flex-direction: column;
   gap: 2rem;
-  overflow: hidden;
-}
-
-/* 左侧区域 */
-.left-section {
-  flex: 7;
-  height: 100%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 右侧区域 */
-.right-section {
-  flex: 3;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  overflow-y: auto;
 }
 
 /* 问候语区域 */
@@ -1746,11 +1870,55 @@ onUnmounted(() => {
   padding: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 工具分类容器 */
+.categories-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+/* 分类卡片 */
+.category-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  min-height: 300px;
+}
+
+/* 分类标题区域 */
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.category-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0;
+}
+
+.category-title {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .time-display {
-  text-align: center;
-  margin-bottom: 1rem;
+  text-align: left;
 }
 
 .current-time {
@@ -1769,7 +1937,8 @@ onUnmounted(() => {
 }
 
 .greeting-content {
-  text-align: center;
+  text-align: right;
+  flex: 1;
 }
 
 .quote-text {
@@ -1803,14 +1972,12 @@ onUnmounted(() => {
 }
 
 .tools-grid {
-   display: flex;
-   flex-wrap: wrap;
-   gap: 1rem;
-   flex: 1;
-   overflow-y: auto;
-   padding-right: 0.5rem;
-   align-content: flex-start;
- }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-content: flex-start;
+  flex: 1;
+}
 
 /* 美化工具网格滚动条 */
 .tools-grid::-webkit-scrollbar {
@@ -1844,7 +2011,8 @@ onUnmounted(() => {
    cursor: pointer;
    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
    text-align: center;
-   width: calc((100% - 5rem) / 5);
+   width: calc((100% - 3rem) / 4);
+   min-width: 80px; /* 确保最小宽度能显示5个字 */
    aspect-ratio: 1;
    min-height: 0;
    backdrop-filter: blur(10px);
@@ -1879,6 +2047,11 @@ onUnmounted(() => {
    line-height: 1.2;
    color: rgba(255, 255, 255, 0.95);
    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+   word-wrap: break-word; /* 允许长单词换行 */
+   word-break: break-all; /* 允许在任意字符间换行 */
+   white-space: normal; /* 允许文本换行 */
+   min-width: 60px; /* 确保最小宽度能显示5个字 */
+   max-width: 100%; /* 限制最大宽度 */
  }
 
 /* 网站分类区域 */
@@ -2036,6 +2209,133 @@ onUnmounted(() => {
   opacity: 0.6;
 }
 
+/* 工具分类标签样式 */
+.tool-category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.category-tab:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.category-tab.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.category-icon {
+  font-size: 1rem;
+}
+
+.category-name {
+  white-space: nowrap;
+}
+
+/* 当前分类工具容器 */
+.current-category-tools {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* 子分类工具样式 */
+.subcategory-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.subcategory-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.subcategory-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.subcategory-icon {
+  font-size: 1.2rem;
+}
+
+/* 网站网格（迷你版） */
+.websites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.website-card.mini {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.website-card.mini:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.website-card.mini .website-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.website-card.mini .website-name {
+  font-size: 0.75rem;
+  color: white;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
 /* 子分类样式 */
 .subcategories-container {
   display: flex;
@@ -2102,6 +2402,7 @@ onUnmounted(() => {
   
   .tool-card {
     width: calc((100% - 4.5rem) / 5);
+    min-width: 80px; /* 保持最小宽度 */
     padding: 0.5rem;
   }
   
@@ -2111,6 +2412,7 @@ onUnmounted(() => {
   
   .tool-name {
     font-size: 0.72rem;
+    min-width: 60px; /* 保持最小宽度 */
   }
 }
 
@@ -2158,6 +2460,7 @@ onUnmounted(() => {
   
   .tool-card {
     width: calc((100% - 2.4rem) / 4);
+    min-width: 80px; /* 保持最小宽度 */
     padding: 0.5rem;
   }
   
@@ -2168,6 +2471,7 @@ onUnmounted(() => {
   
   .tool-name {
     font-size: 0.7rem;
+    min-width: 60px; /* 保持最小宽度 */
   }
   
   .subcategories-container {
@@ -2200,6 +2504,7 @@ onUnmounted(() => {
   
   .tool-card {
     width: calc((100% - 1.2rem) / 3);
+    min-width: 80px; /* 保持最小宽度 */
     padding: 0.4rem;
   }
   
@@ -2211,6 +2516,7 @@ onUnmounted(() => {
   .tool-name {
     font-size: 0.65rem;
     line-height: 1.1;
+    min-width: 60px; /* 保持最小宽度 */
   }
 }
 </style>

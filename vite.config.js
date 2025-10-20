@@ -22,6 +22,8 @@ export default defineConfig({
       }
     }
   },
+  // 静态资源处理
+  assetsInclude: ['**/*.png', '**/*.jpg', '**/*.jpeg', '**/*.gif', '**/*.svg'],
   // 优化依赖预构建
   optimizeDeps: {
     include: [
