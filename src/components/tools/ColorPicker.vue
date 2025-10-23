@@ -1,229 +1,216 @@
 <template>
-  <div class="color-picker-container">
-    <div class="tool-header">
-      <button @click="$router.push('/')" class="back-btn">← 返回主页</button>
-      <h2>🎨 颜色选择器</h2>
-      <p>选择颜色并获取多种格式的颜色值</p>
-    </div>
+  <div class="tool-container">
+    <div class="tool-wrapper">
+      <div class="tool-header">
+        <button @click="$router.push('/')" class="tool-back-btn" aria-label="返回主页" title="返回主页">← 返回主页</button>
+        <h1 class="tool-title" id="colorpicker-title">
+          <span class="tool-icon" aria-hidden="true">🎨</span>
+          <span class="tool-text">颜色选择器</span>
+        </h1>
+        <p class="tool-description" id="colorpicker-description">选择颜色并获取多种格式的颜色值</p>
+      </div>
 
-    <div class="color-picker-content">
-      <!-- 左侧：标签页区域 -->
-      <div class="color-picker-left">
-        <!-- 标签页导航 -->
-        <div class="tab-navigation">
-          <button 
-            class="tab-btn" 
-            :class="{ active: activeTab === 'picker' }"
-            @click="activeTab = 'picker'"
-          >
-            🎨 颜色选择
-          </button>
-          <button 
-            class="tab-btn" 
-            :class="{ active: activeTab === 'schemes' }"
-            @click="activeTab = 'schemes'"
-          >
-            🎯 配色方案
-          </button>
+      <div class="tool-body">
+        <!-- 左侧：标签页区域 -->
+        <div class="tool-main">
+          <!-- 标签页导航 -->
+          <div class="color-picker-tabs" role="tablist" aria-labelledby="colorpicker-title">
+            <button class="color-picker-tab" :class="{ active: activeTab === 'picker' }" @click="activeTab = 'picker'"
+              role="tab" :aria-selected="activeTab === 'picker'" aria-controls="picker-panel" id="picker-tab">
+              <span aria-hidden="true">🎨</span> 颜色选择
+            </button>
+            <button class="color-picker-tab" :class="{ active: activeTab === 'schemes' }" @click="activeTab = 'schemes'"
+              role="tab" :aria-selected="activeTab === 'schemes'" aria-controls="schemes-panel" id="schemes-tab">
+              <span aria-hidden="true">🎯</span> 配色方案
+            </button>
+            <button class="color-picker-tab" :class="{ active: activeTab === 'gradient' }" @click="activeTab = 'gradient'"
+              role="tab" :aria-selected="activeTab === 'gradient'" aria-controls="gradient-panel" id="gradient-tab">
+              <span aria-hidden="true">🌈</span> 渐变色生成
+            </button>
+          </div>
+
+          <!-- 标签页内容 -->
+          <div class="tab-content">
+            <!-- 颜色选择标签页 -->
+            <div v-show="activeTab === 'picker'" class="tab-panel" role="tabpanel" id="picker-panel"
+              aria-labelledby="picker-tab" :aria-hidden="activeTab !== 'picker'">
+              <!-- 主要颜色选择区域 -->
+              <div class="color-main-section">
+                <div class="color-display">
+                  <div class="color-preview-large interactive" :class="{ 'pulse': isColorChanging }"
+                    :style="{ backgroundColor: currentColor }" role="img" :aria-label="`当前选择的颜色: ${currentColor}`"
+                    :title="`当前颜色: ${currentColor}`"></div>
+                  <div class="color-input-group">
+                    <input type="color" v-model="currentColor" class="form-input" @input="updateColor"
+                      aria-label="颜色选择器" :title="`当前颜色: ${currentColor}`">
+                    <button @click="pickColorFromScreen" class="btn btn-secondary interactive hover-glow"
+                      :disabled="!isEyeDropperSupported"
+                      :aria-label="isEyeDropperSupported ? '从屏幕吸取颜色' : '浏览器不支持吸取颜色功能'"
+                      :title="isEyeDropperSupported ? '从屏幕吸取颜色' : '浏览器不支持吸取颜色功能'">
+                      <span aria-hidden="true">🎯</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 调色板 -->
+              <div class="palette-section">
+                <h3 id="palette-title">常用颜色</h3>
+                <div class="color-palette-grid" role="grid" aria-labelledby="palette-title">
+                  <div v-for="color in commonColors" :key="color" class="color-palette-item interactive hover-lift"
+                    :class="{ 'scale-95': isAnimating && currentColor === color }" :style="{ backgroundColor: color }"
+                    @click="selectPaletteColor(color)" :title="color" role="gridcell" :aria-label="`选择颜色 ${color}`"
+                    tabindex="0" @keydown.enter="selectPaletteColor(color)"
+                    @keydown.space.prevent="selectPaletteColor(color)"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 配色方案标签页 -->
+            <div v-show="activeTab === 'schemes'" class="tab-panel" role="tabpanel" id="schemes-panel"
+              aria-labelledby="schemes-tab" :aria-hidden="activeTab !== 'schemes'">
+              <div class="color-schemes-section">
+                <h3 id="schemes-title">管理系统配色方案</h3>
+                <div class="schemes-container" role="region" aria-labelledby="schemes-title">
+                  <div v-for="(scheme, key) in colorSchemes" :key="key" class="color-scheme" role="group"
+                    :aria-labelledby="`scheme-${key}-title`">
+                    <div class="scheme-header">
+                      <h4 :id="`scheme-${key}-title`">{{ scheme.name }}</h4>
+                      <p class="scheme-description" :id="`scheme-${key}-desc`">{{ scheme.description }}</p>
+                    </div>
+                    <div class="scheme-colors" role="group" :aria-labelledby="`scheme-${key}-title`"
+                      :aria-describedby="`scheme-${key}-desc`">
+                      <div v-for="color in scheme.colors" :key="color" class="scheme-color interactive hover-lift"
+                        :class="{ 'scale-95': isAnimating && currentColor === color }"
+                        :style="{ backgroundColor: color }" @click="selectPaletteColor(color)" :title="color"
+                        role="button" :aria-label="`选择颜色 ${color}`" tabindex="0"
+                        @keydown.enter="selectPaletteColor(color)" @keydown.space.prevent="selectPaletteColor(color)">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 渐变色生成标签页 -->
+            <div v-show="activeTab === 'gradient'" class="tab-panel" role="tabpanel" id="gradient-panel"
+              aria-labelledby="gradient-tab" :aria-hidden="activeTab !== 'gradient'">
+              <div class="gradient-section">
+                <h3 id="gradient-title">渐变色生成器</h3>
+                <div class="gradient-controls" role="region" aria-labelledby="gradient-title">
+                  <div class="gradient-inputs">
+                    <div class="form-group">
+                      <label class="form-label" for="gradient-start">起始颜色:</label>
+                      <input type="color" v-model="gradientStart" class="form-input" id="gradient-start"
+                        aria-label="渐变起始颜色" @input="updateGradient">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="gradient-end">结束颜色:</label>
+                      <input type="color" v-model="gradientEnd" class="form-input" id="gradient-end"
+                        aria-label="渐变结束颜色" @input="updateGradient">
+                    </div>
+                  </div>
+                  <div class="gradient-preview" :style="{ background: gradientCSS }" role="img"
+                    :aria-label="`渐变预览: 从 ${gradientStart} 到 ${gradientEnd}`"></div>
+                  <div class="form-group">
+                    <label class="form-label" for="gradient-css">CSS 渐变:</label>
+                    <textarea v-model="gradientCSS" class="form-input" readonly id="gradient-css"
+                      aria-label="CSS渐变代码"></textarea>
+                    <button @click="copyToClipboard(gradientCSS)" class="btn btn-primary" aria-label="复制CSS渐变代码"
+                      title="复制CSS渐变代码">
+                      <span aria-hidden="true">📋</span> 复制
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <!-- 标签页内容 -->
-        <div class="tab-content">
-          <!-- 颜色选择标签页 -->
-          <div v-show="activeTab === 'picker'" class="tab-panel">
-            <!-- 主要颜色选择区域 -->
-            <div class="color-main-section">
-              <div class="color-display">
-                <div 
-                  class="color-preview" 
-                  :style="{ backgroundColor: currentColor }"
-                ></div>
-                <div class="color-input-group">
-                  <input 
-                    type="color" 
-                    v-model="currentColor" 
-                    class="color-input"
-                    @input="updateColor"
-                  >
-                  <button 
-                    @click="pickColorFromScreen" 
-                    class="eyedropper-btn"
-                    :disabled="!isEyeDropperSupported"
-                    :title="isEyeDropperSupported ? '从屏幕吸取颜色' : '浏览器不支持吸取颜色功能'"
-                  >
-                    🎯
+
+        <!-- 右侧：颜色值和历史记录 -->
+        <div class="tool-sidebar">
+          <!-- 颜色值显示 -->
+          <div class="color-values-section">
+            <h3 id="color-values-title">颜色值</h3>
+            <div class="color-values" role="region" aria-labelledby="color-values-title">
+              <div class="form-group">
+                <label class="form-label" for="hex-input">HEX:</label>
+                <div class="input-with-copy">
+                  <input type="text" :value="colorFormats.hex" @input="updateFromHex" class="form-input" readonly
+                    id="hex-input" aria-label="HEX颜色值">
+                  <button @click="copyToClipboard(colorFormats.hex)" class="btn btn-sm" aria-label="复制HEX颜色值"
+                    title="复制HEX颜色值">
+                    <span aria-hidden="true">📋</span>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="rgb-input">RGB:</label>
+                <div class="input-with-copy">
+                  <input type="text" :value="colorFormats.rgb" class="form-input" readonly id="rgb-input"
+                    aria-label="RGB颜色值">
+                  <button @click="copyToClipboard(colorFormats.rgb)" class="btn btn-sm" aria-label="复制RGB颜色值"
+                    title="复制RGB颜色值">
+                    <span aria-hidden="true">📋</span>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="hsl-input">HSL:</label>
+                <div class="input-with-copy">
+                  <input type="text" :value="colorFormats.hsl" class="form-input" readonly id="hsl-input"
+                    aria-label="HSL颜色值">
+                  <button @click="copyToClipboard(colorFormats.hsl)" class="btn btn-sm" aria-label="复制HSL颜色值"
+                    title="复制HSL颜色值">
+                    <span aria-hidden="true">📋</span>
                   </button>
                 </div>
               </div>
             </div>
-            
-            <!-- 调色板 -->
-            <div class="palette-section">
-              <h3>常用颜色</h3>
-              <div class="color-palette">
-                <div 
-                  v-for="color in commonColors" 
-                  :key="color"
-                  class="palette-color"
-                  :style="{ backgroundColor: color }"
-                  @click="selectPaletteColor(color)"
-                  :title="color"
-                ></div>
-              </div>
-            </div>
           </div>
-          
-          <!-- 配色方案标签页 -->
-          <div v-show="activeTab === 'schemes'" class="tab-panel">
-            <div class="color-schemes-section">
-              <h3>管理系统配色方案</h3>
-              <div class="schemes-container">
-                <div 
-                  v-for="(scheme, key) in colorSchemes" 
-                  :key="key"
-                  class="color-scheme"
-                >
-                  <div class="scheme-header">
-                    <h4>{{ scheme.name }}</h4>
-                    <p class="scheme-description">{{ scheme.description }}</p>
-                  </div>
-                  <div class="scheme-colors">
-                    <div 
-                      v-for="color in scheme.colors" 
-                      :key="color"
-                      class="scheme-color"
-                      :style="{ backgroundColor: color }"
-                      @click="selectPaletteColor(color)"
-                      :title="color"
-                    ></div>
-                  </div>
-                </div>
-              </div>
+
+          <!-- 历史记录 -->
+          <div class="history-section">
+            <h3>使用历史</h3>
+            <div class="history-list">
+              <div v-for="item in toolsStore.toolHistory.slice(0, 5)" :key="item.timestamp" class="history-item">
+                 <span class="history-tool">{{ item.name }}</span>
+                 <span class="history-time">{{ new Date(item.timestamp).toLocaleString() }}</span>
+               </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <!-- 右侧：颜色值和历史记录 -->
-      <div class="color-picker-right">
-        <!-- 颜色值显示 -->
-        <div class="color-values-section">
-          <h3>颜色值</h3>
-          <div class="color-values">
-          <div class="color-format">
-            <label>HEX:</label>
-            <div class="value-group">
-              <input 
-                type="text" 
-                :value="colorFormats.hex" 
-                @input="updateFromHex"
-                class="color-value-input"
-              >
-              <button @click="copyToClipboard(colorFormats.hex)" class="copy-btn">复制</button>
-            </div>
-          </div>
-
-          <div class="color-format">
-            <label>RGB:</label>
-            <div class="value-group">
-              <input 
-                type="text" 
-                :value="colorFormats.rgb" 
-                readonly
-                class="color-value-input"
-              >
-              <button @click="copyToClipboard(colorFormats.rgb)" class="copy-btn">复制</button>
-            </div>
-          </div>
-
-          <div class="color-format">
-            <label>HSL:</label>
-            <div class="value-group">
-              <input 
-                type="text" 
-                :value="colorFormats.hsl" 
-                readonly
-                class="color-value-input"
-              >
-              <button @click="copyToClipboard(colorFormats.hsl)" class="copy-btn">复制</button>
-            </div>
-          </div>
-
-          <div class="color-format">
-            <label>HSV:</label>
-            <div class="value-group">
-              <input 
-                type="text" 
-                :value="colorFormats.hsv" 
-                readonly
-                class="color-value-input"
-              >
-              <button @click="copyToClipboard(colorFormats.hsv)" class="copy-btn">复制</button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 渐变色生成 -->
-        <div class="gradient-section">
-          <h3>渐变色生成</h3>
-          <div class="gradient-controls">
-            <div class="gradient-colors">
-              <div class="gradient-color-item">
-                <label>起始颜色:</label>
-                <input type="color" v-model="gradientStart" @input="updateGradient">
-              </div>
-              <div class="gradient-color-item">
-                <label>结束颜色:</label>
-                <input type="color" v-model="gradientEnd" @input="updateGradient">
-              </div>
-            </div>
-            <div class="gradient-preview" :style="{ background: gradientCSS }"></div>
-            <div class="gradient-output">
-              <label>CSS渐变:</label>
-              <div class="value-group">
-                <textarea 
-                  :value="gradientCSS" 
-                  readonly
-                  class="gradient-textarea"
-                ></textarea>
-                <button @click="copyToClipboard(gradientCSS)" class="copy-btn">复制</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useToolsStore } from '@/stores/counter'
+import { showNotification } from '@/utils/notification'
 
+const router = useRouter()
 const toolsStore = useToolsStore()
 
-// 当前选中的颜色
-const currentColor = ref('#3498db')
-
-// 渐变色设置
-const gradientStart = ref('#3498db')
-const gradientEnd = ref('#e74c3c')
-
-// 标签页状态
+// 响应式数据
 const activeTab = ref('picker')
+const isAnimating = ref(false)
+const isColorChanging = ref(false)
+const currentColor = ref('#3498db')
+const gradientStart = ref('#ff6b6b')
+const gradientEnd = ref('#4ecdc4')
 
 // 检查浏览器是否支持EyeDropper API
 const isEyeDropperSupported = ref(false)
 
 // 检查EyeDropper API支持
-if ('EyeDropper' in window) {
-  isEyeDropperSupported.value = true
-}
-
-
+onMounted(() => {
+  if (typeof window !== 'undefined' && 'EyeDropper' in window) {
+    isEyeDropperSupported.value = true
+  }
+})
 
 // 常用颜色调色板
 const commonColors = [
@@ -269,24 +256,12 @@ const colorSchemes = ref({
   // 青色系 - 科技现代
   cyan: {
     name: '青色系',
-    description: '科技现代，适合数据或技术类系统',
+    description: '科技现代，适合科技或数据类系统',
     colors: ['#13C2C2', '#36CFC9', '#5CDBD3', '#87E8DE', '#B5F5EC', '#E6FFFB']
-  },
-  // 灰色系 - 简约中性
-  gray: {
-    name: '灰色系',
-    description: '简约中性，适合极简风格系统',
-    colors: ['#595959', '#8C8C8C', '#BFBFBF', '#D9D9D9', '#F0F0F0', '#FAFAFA']
-  },
-  // 金色系 - 奢华高贵
-  gold: {
-    name: '金色系',
-    description: '奢华高贵，适合金融或VIP系统',
-    colors: ['#FAAD14', '#FFC53D', '#FFD666', '#FFE58F', '#FFF1B8', '#FFFBE6']
   }
-});
+})
 
-// 颜色格式转换
+// 计算属性
 const colorFormats = computed(() => {
   const hex = currentColor.value
   const rgb = hexToRgb(hex)
@@ -362,674 +337,143 @@ function rgbToHsv(r, g, b) {
   return { h: h * 60, s: s * 100, v: v * 100 }
 }
 
+// 颜色预览动画
+const animateColorPreview = () => {
+  if (typeof document !== 'undefined') {
+    const preview = document.querySelector('.color-preview-large');
+    if (preview) {
+      preview.classList.add('pulse');
+      setTimeout(() => {
+        preview.classList.remove('pulse');
+      }, 300);
+    }
+  }
+};
+
 // 更新颜色
 function updateColor() {
-  toolsStore.addToHistory('颜色选择器')
+  isColorChanging.value = true;
+  animateColorPreview();
+  toolsStore.addToolHistory('颜色选择器');
+  showNotification.success('颜色已更新');
+  
+  setTimeout(() => {
+    isColorChanging.value = false;
+  }, 300);
 }
 
 // 从HEX输入更新颜色
 function updateFromHex(event) {
-  const hex = event.target.value
-  if (/^#[0-9A-F]{6}$/i.test(hex)) {
-    currentColor.value = hex
+  const hex = event.target.value;
+  // 验证HEX格式（支持3位和6位）
+  const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+  if (hexRegex.test(hex)) {
+    // 将3位HEX转换为6位
+    let normalizedHex = hex;
+    if (hex.length === 4) {
+      normalizedHex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+    }
+    currentColor.value = normalizedHex;
+    updateColor();
+  } else if (hex.length >= 4) {
+    showNotification.warning('请输入有效的HEX颜色值（如：#FF0000 或 #F00）');
   }
 }
 
 // 选择调色板颜色
 function selectPaletteColor(color) {
-  currentColor.value = color
-  toolsStore.addToHistory('颜色选择器')
+  if (isAnimating.value) return;
+  
+  isAnimating.value = true;
+  currentColor.value = color;
+  animateColorPreview();
+  toolsStore.addToolHistory('颜色选择器');
+  showNotification.success(`已选择颜色：${color}`);
+  
+  setTimeout(() => {
+    isAnimating.value = false;
+  }, 300);
 }
 
 // 更新渐变
 function updateGradient() {
-  // 渐变更新时的逻辑
+  showNotification.info('渐变色已更新');
 }
-
-
 
 // 从屏幕吸取颜色
 async function pickColorFromScreen() {
   if (!isEyeDropperSupported.value) {
-    alert('您的浏览器不支持吸取颜色功能，请使用Chrome 95+或其他支持EyeDropper API的浏览器')
-    return
+    showNotification.error('您的浏览器不支持吸取颜色功能，请使用Chrome 95+或其他支持EyeDropper API的浏览器');
+    return;
   }
 
   try {
-    const eyeDropper = new EyeDropper()
-    const result = await eyeDropper.open()
+    showNotification.info('请点击屏幕上的任意位置来吸取颜色');
+    const eyeDropper = new EyeDropper();
+    const result = await eyeDropper.open();
     
     if (result && result.sRGBHex) {
-      currentColor.value = result.sRGBHex
-      toolsStore.addToolHistory('颜色选择器')
+      currentColor.value = result.sRGBHex;
+      animateColorPreview();
+      toolsStore.addToolHistory('颜色选择器');
+      showNotification.success(`成功吸取颜色：${result.sRGBHex}`);
     }
   } catch (error) {
     if (error.name === 'AbortError') {
       // 用户取消了操作，不显示错误信息
-      return
+      return;
     } else if (error.name === 'NotAllowedError') {
-      alert('浏览器拒绝了颜色选择权限，请检查浏览器设置')
+      showNotification.error('浏览器拒绝了颜色选择权限，请检查浏览器设置');
     } else {
-      console.error('吸取颜色时发生错误:', error)
-      alert('吸取颜色失败，请重试')
+      console.error('吸取颜色时发生错误:', error);
+      showNotification.error('吸取颜色失败，请重试');
     }
-    // AbortError表示用户取消了操作，不需要显示错误信息
   }
 }
 
 // 复制到剪贴板
 function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    // 可以添加提示信息
-  })
+  if (!text) {
+    showNotification.warning('没有可复制的内容');
+    return;
+  }
+  
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showNotification.success(`已复制到剪贴板：${text}`);
+      
+      // 添加复制按钮动画效果
+      if (typeof document !== 'undefined') {
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+          if (button.textContent.includes('复制')) {
+            button.classList.add('scale-95');
+            setTimeout(() => {
+              button.classList.remove('scale-95');
+            }, 150);
+          }
+        });
+      }
+    }).catch(() => {
+      showNotification.error('复制失败，请手动复制');
+    });
+  } else {
+    // 降级方案：使用传统的复制方法
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      showNotification.success(`已复制到剪贴板：${text}`);
+    } catch (error) {
+      showNotification.error('复制失败，请手动复制');
+    }
+  }
 }
-
-
 </script>
 
 <style scoped>
-.color-picker-container {
-  width: 100vw;
-  min-height: 100vh;
-  padding: 20px;
-  background: linear-gradient(145deg, #ffffff, #f8f9fa);
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-}
-
-.tool-header {
-  position: relative;
-  text-align: center;
-  margin-bottom: 40px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid rgba(0, 123, 255, 0.1);
-}
-
-.back-btn {
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: linear-gradient(145deg, #6c757d, #5a6268);
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.back-btn:hover {
-  background: linear-gradient(145deg, #5a6268, #495057);
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 20px rgba(108, 117, 125, 0.4);
-}
-
-.tool-header h2 {
-  color: #2c3e50;
-  margin-bottom: 15px;
-  font-size: 3rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.tool-header p {
-  color: #6c757d;
-  font-size: 1.2rem;
-  font-weight: 500;
-  line-height: 1.6;
-}
-
-.color-picker-content {
-  display: flex;
-  gap: 30px;
-  margin-top: 30px;
-  flex: 1;
-  min-height: 0;
-}
-
-.color-picker-left {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-/* 标签页导航样式 */
-.tab-navigation {
-  display: flex;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  border-radius: 15px 15px 0 0;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-bottom: none;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 15px 20px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  color: #6c757d;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  border-right: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.tab-btn:last-child {
-  border-right: none;
-}
-
-.tab-btn:hover {
-  background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
-}
-
-.tab-btn.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-}
-
-/* 标签页内容样式 */
-.tab-content {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: none;
-  border-radius: 0 0 15px 15px;
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-}
-
-.tab-panel {
-  height: 100%;
-  padding: 20px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* 优化滚动条样式 */
-.tab-panel::-webkit-scrollbar {
-  width: 8px;
-}
-
-.tab-panel::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.tab-panel::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 4px;
-}
-
-.tab-panel::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #5a67d8, #6b46c1);
-}
-
-.color-picker-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.color-main-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(5px);
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-}
-
-.color-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
-.color-preview {
-  width: 120px;
-  height: 120px;
-  border-radius: 15px;
-  border: 3px solid #ecf0f1;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.color-input-group {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.color-input {
-  width: 80px;
-  height: 50px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 15px;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.eyedropper-btn {
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(145deg, #e74c3c, #c0392b);
-  color: white;
-  border: none;
-  border-radius: 15px;
-  cursor: pointer;
-  font-size: 20px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.eyedropper-btn:hover:not(:disabled) {
-  background: linear-gradient(145deg, #c0392b, #a93226);
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 12px 25px rgba(231, 76, 60, 0.4);
-}
-
-.eyedropper-btn:active:not(:disabled) {
-  transform: translateY(0) scale(0.98);
-}
-
-.eyedropper-btn:disabled {
-  background: linear-gradient(145deg, #bdc3c7, #95a5a6);
-  cursor: not-allowed;
-  opacity: 0.6;
-  transform: none;
-  box-shadow: 0 4px 10px rgba(189, 195, 199, 0.2);
-}
-
-.color-values {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.color-format {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.color-format label {
-  width: 60px;
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-.value-group {
-  display: flex;
-  gap: 10px;
-  flex: 1;
-}
-
-.color-value-input {
-  flex: 1;
-  padding: 10px 15px;
-  border: 2px solid #ecf0f1;
-  border-radius: 8px;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-}
-
-.copy-btn {
-  background: linear-gradient(145deg, #3498db, #2980b9);
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.copy-btn:hover {
-  background: linear-gradient(145deg, #2980b9, #21618c);
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
-}
-
-.palette-section {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(5px);
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  flex: 1;
-}
-
-.gradient-section {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  padding: 35px;
-  border-radius: 18px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-  flex: 1;
-}
-
-.palette-section h3,
-.gradient-section h3 {
-  color: #2c3e50;
-  margin-bottom: 25px;
-  font-size: 1.8rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.color-palette {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.palette-color {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
-  cursor: pointer;
-  border: 3px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.palette-color:hover {
-  transform: scale(1.15) translateY(-2px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-  border-color: rgba(255, 255, 255, 1);
-}
-
-.gradient-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
-.gradient-colors {
-  display: flex;
-  gap: 20px;
-}
-
-.gradient-color-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.gradient-color-item label {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-.gradient-color-item input[type="color"] {
-  width: 60px;
-  height: 50px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
-  cursor: pointer;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.gradient-preview {
-  height: 60px;
-  border-radius: 10px;
-  border: 2px solid #ecf0f1;
-}
-
-.gradient-output {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
-}
-
-.gradient-output label {
-  font-weight: bold;
-  color: #2c3e50;
-  margin-top: 10px;
-}
-
-.gradient-textarea {
-  flex: 1;
-  padding: 10px 15px;
-  border: 2px solid #ecf0f1;
-  border-radius: 8px;
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  resize: vertical;
-  min-height: 60px;
-}
-
-/* 颜色套组样式 */
-.color-schemes-section {
-  flex: 1;
-}
-
-.color-schemes-section h3 {
-  color: #2c3e50;
-  margin-bottom: 25px;
-  font-size: 1.8rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.schemes-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.color-scheme {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 15px;
-  padding: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-}
-
-.color-scheme:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: rgba(255, 255, 255, 0.8);
-}
-
-.scheme-header {
-  margin-bottom: 15px;
-}
-
-.scheme-header h4 {
-  color: #2c3e50;
-  font-size: 1.3rem;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-}
-
-.scheme-description {
-  color: #6c757d;
-  font-size: 0.9rem;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.scheme-colors {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.scheme-color {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-
-.scheme-color:hover {
-  transform: scale(1.1) translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 1);
-  z-index: 10;
-}
-
-.scheme-color:hover::after {
-  content: attr(title);
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 20;
-}
-
-
-
-@media (max-width: 768px) {
-  .color-picker-container {
-    padding: 15px;
-    min-height: 100vh;
-  }
-  
-  .color-picker-content {
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .color-picker-left,
-  .color-picker-right {
-    flex: none;
-  }
-  
-  .color-picker-right {
-    max-height: 60vh;
-    overflow-y: auto;
-  }
-  
-  .color-main-section {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-  
-  .color-input-group {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .eyedropper-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 18px;
-  }
-  
-  .gradient-colors {
-    flex-direction: column;
-  }
-  
-  .color-palette {
-    grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
-  }
-  
-  .palette-color {
-    width: 35px;
-    height: 35px;
-  }
-  
-  .tab-btn {
-    padding: 12px 15px;
-    font-size: 14px;
-  }
-  
-  .tab-panel {
-    padding: 15px;
-  }
-  
-  .color-schemes-section {
-    padding: 0;
-  }
-  
-  .color-scheme {
-    padding: 15px;
-  }
-  
-  .scheme-header h4 {
-    font-size: 1.1rem;
-  }
-  
-  .scheme-description {
-    font-size: 0.8rem;
-  }
-  
-  .scheme-color {
-    width: 30px;
-    height: 30px;
-  }
-}
+/* ColorPicker组件的特定样式已在统一的组件样式系统中定义 */
 </style>

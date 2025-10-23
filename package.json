@@ -25,9 +25,7 @@
     "md-editor-v3": "^6.0.1",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.5.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-konva": "^19.0.10",
+
     "remark-highlight.js": "^8.0.0",
     "tesseract.js": "^6.0.1",
     "three": "^0.180.0",

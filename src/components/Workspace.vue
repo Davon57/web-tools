@@ -157,6 +157,7 @@ const toolCategories = ref([
         icon: '📋',
         tools: [
           { id: 'todo', name: '待办事项', icon: '📝', component: 'FullscreenTodo' },
+          { id: 'note-taker', name: '笔记标签', icon: '📒', component: 'NoteTaker' },
           { id: 'whiteboard', name: '在线白板', icon: '🎨', component: 'Whiteboard' }
         ]
       }
@@ -1797,6 +1798,7 @@ const openTool = (tool) => {
     'ocr': '/ocr-tool',
     'image-compressor': '/image-compressor',
     'todo': '/todo-kanban',
+    'note-taker': '/note-taker',
     'whiteboard': '/whiteboard',
     'markdown-editor': '/markdown-editor',
     'recipe-system': '/recipe-system',
