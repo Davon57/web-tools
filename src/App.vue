@@ -1,10 +1,51 @@
 <script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
 // 使用Vue Router进行页面路由管理
+const isLoading = ref(true)
+const router = useRouter()
+
+// 模拟初始加载
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false
+  }, 1000)
+})
+
+// 路由变化时的加载状态
+router.beforeEach((to, from, next) => {
+  if (from.name) {
+    isLoading.value = true
+    setTimeout(() => {
+      isLoading.value = false
+      next()
+    }, 300)
+  } else {
+    next()
+  }
+})
 </script>
 
 <template>
   <div id="app">
-    <router-view />
+    <!-- 全局加载指示器 -->
+    <div v-if="isLoading" class="global-loading">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">加载中...</div>
+      </div>
+    </div>
+    
+    <!-- 页面过渡动画 -->
+    <router-view v-slot="{ Component }">
+      <transition name="page" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
+    
+    <!-- 全局通知容器 -->
+    <div class="notification-container" id="notification-container"></div>
   </div>
 </template>
 
@@ -623,11 +664,16 @@ body {
   font-size: 14px;
 }
 
-/* PC端大屏幕优化 */
-@media (min-width: 1600px) {
+/* 超大屏幕优化 (1536px+) */
+@media (min-width: 1536px) {
   .header-content {
     max-width: 1800px;
     padding: 0 60px;
+    height: 80px;
+  }
+  
+  .app-title {
+    font-size: 28px;
   }
   
   .home-page {
@@ -635,9 +681,58 @@ body {
     padding: 60px;
   }
   
+  .hero-title {
+    font-size: 42px;
+  }
+  
+  .hero-subtitle {
+    font-size: 20px;
+  }
+  
+  .categories-grid {
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 40px;
+  }
+  
+  .tools-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 35px;
+  }
+  
+  .toolbox-dropdown {
+    min-width: 350px;
+    max-width: 450px;
+  }
+}
+
+/* 大屏幕优化 (1280px - 1535px) */
+@media (min-width: 1280px) and (max-width: 1535px) {
+  .header-content {
+    max-width: 1600px;
+    padding: 0 50px;
+    height: 75px;
+  }
+  
+  .app-title {
+    font-size: 26px;
+  }
+  
+  .home-page {
+    max-width: 1600px;
+    padding: 50px;
+  }
+  
+  .hero-title {
+    font-size: 38px;
+  }
+  
+  .hero-subtitle {
+    font-size: 19px;
+  }
+  
   .categories-grid {
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 30px;
+    gap: 35px;
   }
   
   .tools-grid {
@@ -646,86 +741,219 @@ body {
   }
 }
 
-/* 中等屏幕优化 */
-@media (min-width: 1200px) and (max-width: 1599px) {
+/* 桌面端优化 (1024px - 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .header-content {
+    max-width: 1400px;
+    padding: 0 40px;
+  }
+  
+  .home-page {
+    max-width: 1400px;
+    padding: 40px;
+  }
+  
+  .hero-title {
+    font-size: 36px;
+  }
+  
   .categories-grid {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
   }
   
   .tools-grid {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
   }
 }
 
-/* 平板端适配 */
-@media (min-width: 769px) and (max-width: 1199px) {
+/* 平板端优化 (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
   .header-content {
     padding: 0 30px;
+    height: 65px;
+  }
+  
+  .app-title {
+    font-size: 22px;
   }
   
   .home-page {
     padding: 30px;
   }
   
+  .hero-title {
+    font-size: 30px;
+  }
+  
+  .hero-subtitle {
+    font-size: 17px;
+  }
+  
   .categories-grid {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    gap: 25px;
   }
   
   .tools-grid {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 20px;
   }
+  
+  .compact-toolbox {
+    top: 80px;
+    right: 20px;
+  }
+  
+  .toolbox-dropdown {
+    min-width: 280px;
+    max-width: 350px;
+  }
 }
 
-/* 移动端适配 */
-@media (max-width: 768px) {
+/* 移动端优化 (481px - 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
   .header-content {
-    flex-direction: column;
-    height: auto;
-    padding: 15px 20px;
-    gap: 15px;
+    flex-direction: row;
+    height: 60px;
+    padding: 0 25px;
+    gap: 10px;
   }
   
-  .categories-grid {
-    grid-template-columns: 1fr;
+  .app-title {
+    font-size: 20px;
   }
   
-  .tools-grid {
-    grid-template-columns: 1fr;
+  .back-btn {
+    padding: 8px 16px;
+    font-size: 13px;
   }
   
   .home-page, .category-page {
-    padding: 20px;
+    padding: 25px;
   }
   
   .hero-section {
-    padding: 20px 0;
-    margin-bottom: 30px;
+    padding: 25px 0;
+    margin-bottom: 25px;
   }
   
   .hero-title {
-    font-size: 26px;
+    font-size: 28px;
   }
   
   .hero-subtitle {
     font-size: 16px;
   }
   
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .tools-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+  
+  .compact-toolbox {
+    top: 70px;
+    right: 15px;
+  }
+  
+  .toolbox-toggle-btn {
+    min-width: 130px;
+    font-size: 14px;
+    padding: 12px 20px;
+  }
+  
+  .toolbox-dropdown {
+    min-width: 280px;
+    max-width: 320px;
+    max-height: 60vh;
+  }
+  
+  .category-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .category-icon-large {
+    font-size: 45px;
+  }
+  
+  .category-title {
+    font-size: 22px;
+  }
+}
 
+/* 小屏移动端优化 (max-width: 480px) */
+@media (max-width: 480px) {
+  .header-content {
+    flex-direction: column;
+    height: auto;
+    padding: 12px 15px;
+    gap: 12px;
+  }
+  
+  .app-title {
+    font-size: 18px;
+  }
+  
+  .back-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+    align-self: center;
+  }
+  
+  .app-main {
+    padding: 15px;
+    height: calc(100vh - 120px);
+  }
+  
+  .home-page, .category-page {
+    padding: 15px;
+  }
+  
+  .hero-section {
+    padding: 15px 0;
+    margin-bottom: 20px;
+  }
+  
+  .hero-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  
+  .hero-subtitle {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .categories-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .tools-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
   
   /* 移动端紧凑工具箱样式 */
   .compact-toolbox {
     position: static;
-    margin: 20px 0;
+    margin: 15px 0;
     display: flex;
     justify-content: center;
   }
   
   .toolbox-toggle-btn {
-    min-width: 140px;
-    font-size: 16px;
-    padding: 14px 24px;
+    min-width: 120px;
+    font-size: 14px;
+    padding: 12px 20px;
   }
   
   .toolbox-dropdown {
@@ -734,36 +962,181 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 90vw;
-    max-width: 350px;
+    max-width: 320px;
     max-height: 70vh;
+    border-radius: 12px;
+  }
+  
+  .dropdown-header {
+    padding: 12px 15px;
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .dropdown-header h4 {
+    font-size: 16px;
   }
   
   .toolbox-section {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
   }
   
   .home-page .recent-section,
   .home-page .favorites-section {
-    padding: 20px;
-    margin-bottom: 20px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 12px;
   }
   
   .category-info {
     flex-direction: column;
     text-align: center;
-    gap: 15px;
+    gap: 10px;
   }
   
   .category-icon-large {
-    font-size: 48px;
+    font-size: 40px;
   }
   
   .category-title {
-    font-size: 24px;
+    font-size: 20px;
+  }
+  
+  .category-description {
+    font-size: 13px;
+    line-height: 1.4;
   }
   
   .placeholder-icon {
-    font-size: 60px;
+    font-size: 50px;
+  }
+}
+
+/* 全局加载指示器样式 */
+.global-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #2c3e50;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* 页面过渡动画 */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.3s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+/* 通知容器样式 */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+/* 超小屏幕优化 (max-width: 360px) */
+@media (max-width: 360px) {
+  .header-content {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  
+  .app-title {
+    font-size: 16px;
+  }
+  
+  .back-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+  
+  .app-main {
+    padding: 12px;
+  }
+  
+  .home-page, .category-page {
+    padding: 12px;
+  }
+  
+  .hero-title {
+    font-size: 20px;
+  }
+  
+  .hero-subtitle {
+    font-size: 13px;
+  }
+  
+  .toolbox-dropdown {
+    width: 95vw;
+    max-width: 280px;
+  }
+  
+  .category-icon-large {
+    font-size: 35px;
+  }
+  
+  .category-title {
+    font-size: 18px;
+  }
+  
+  .placeholder-icon {
+    font-size: 45px;
+  }
+  
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .loading-text {
+    font-size: 14px;
+  }
+  
+  .notification-container {
+    top: 10px;
+    right: 10px;
   }
 }
 </style>

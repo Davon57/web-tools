@@ -42,6 +42,11 @@ const routes = [
     component: () => import('../components/tools/ColorPicker.vue')
   },
   {
+    path: '/note-taker',
+    name: 'NoteTaker',
+    component: () => import('../components/tools/NoteTaker.vue')
+  },
+  {
     path: '/json-formatter',
     name: 'JsonFormatter',
     component: () => import('../components/tools/JsonFormatter.vue')
