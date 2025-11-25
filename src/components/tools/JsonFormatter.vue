@@ -49,54 +49,20 @@
       </div>
       
       <div class="formatter-right">
-        <div v-if="outputJson" class="output-section">
-          <h3>格式化结果</h3>
-          <div class="output-actions">
-            <button @click="copyToClipboard" class="copy-btn">复制</button>
+        <div v-if="formattedCode" class="tree-view-section">
+          <h3>树形视图</h3>
+          <div class="tree-actions">
+            <button @click="copyToClipboard" class="copy-btn">复制结果</button>
+            <button @click="copyOriginalJson" class="copy-btn">复制原文</button>
             <button @click="downloadJson" class="download-btn">下载</button>
-            <button @click="validateJson" class="validate-btn">验证</button>
+            <button @click="validateOutputJson" class="validate-btn">验证</button>
           </div>
-          <textarea 
-            v-model="outputJson" 
-            readonly 
-            class="json-textarea output-textarea"
-          ></textarea>
-          
-          <div v-if="jsonStats" class="json-stats">
-            <div class="stats-grid">
-              <div class="stat-item">
-                <span class="stat-label">字符数:</span>
-                <span class="stat-value">{{ jsonStats.characters }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">行数:</span>
-                <span class="stat-value">{{ jsonStats.lines }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">对象数:</span>
-                <span class="stat-value">{{ jsonStats.objects }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">数组数:</span>
-                <span class="stat-value">{{ jsonStats.arrays }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">键值对:</span>
-                <span class="stat-value">{{ jsonStats.properties }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">深度:</span>
-                <span class="stat-value">{{ jsonStats.depth }}</span>
-              </div>
-            </div>
+          <div class="tree-container-vertical">
+            <pre class="code-block"><code v-html="highlightedJson"></code></pre>
           </div>
         </div>
-        
-        <div class="json-tree-section" v-if="parsedJson">
-          <h3>树形视图</h3>
-          <div class="tree-container">
-            <JsonTreeNode :data="parsedJson" :key-name="'root'" :level="0" />
-          </div>
+        <div v-else class="empty-tree-view">
+          <p>格式化后的JSON将在这里显示为树形视图</p>
         </div>
       </div>
     </div>
@@ -107,6 +73,11 @@
 import { ref, computed } from 'vue'
 import { useToolsStore } from '@/stores/counter'
 import JsonTreeNode from './JsonTreeNode.vue'
+import { validateJson, formatValidationErrors } from '@/utils/jsonValidator'
+import hljs from 'highlight.js/lib/core'
+import jsonLang from 'highlight.js/lib/languages/json'
+
+hljs.registerLanguage('json', jsonLang)
 
 const toolsStore = useToolsStore()
 const inputJson = ref('')
@@ -132,6 +103,22 @@ const jsonStats = computed(() => {
   } catch {
     return { characters, lines, objects: 0, arrays: 0, properties: 0, depth: 0 }
   }
+})
+
+const formattedCode = computed(() => {
+  if (parsedJson.value !== null) {
+    try {
+      return JSON.stringify(parsedJson.value, null, 2)
+    } catch {
+      return outputJson.value || ''
+    }
+  }
+  return outputJson.value || ''
+})
+
+const highlightedJson = computed(() => {
+  if (!formattedCode.value) return ''
+  return hljs.highlight(formattedCode.value, { language: 'json' }).value
 })
 
 const analyzeJson = (obj, depth = 0) => {
@@ -226,6 +213,24 @@ const copyToClipboard = async () => {
   }
 }
 
+const copyFormattedJson = async () => {
+  try {
+    await navigator.clipboard.writeText(outputJson.value)
+    alert('已复制格式化JSON')
+  } catch (err) {
+    console.error('复制失败:', err)
+  }
+}
+
+const copyOriginalJson = async () => {
+  try {
+    await navigator.clipboard.writeText(inputJson.value)
+    alert('已复制原始JSON')
+  } catch (err) {
+    console.error('复制失败:', err)
+  }
+}
+
 const downloadJson = () => {
   const blob = new Blob([outputJson.value], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
@@ -236,7 +241,7 @@ const downloadJson = () => {
   URL.revokeObjectURL(url)
 }
 
-const validateJson = () => {
+const validateOutputJson = () => {
   try {
     JSON.parse(outputJson.value)
     alert('✅ JSON 格式正确')
@@ -364,6 +369,7 @@ const removeComments = () => {
   gap: 30px;
   flex: 1;
   min-height: 0;
+  height: 80vh;
 }
 
 .formatter-left {
@@ -374,7 +380,7 @@ const removeComments = () => {
 }
 
 .formatter-right {
-  flex: 1;
+  flex: 1.5;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -630,11 +636,82 @@ button:disabled {
   box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
 }
 
+.tree-view-section {
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
+  padding: 25px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.tree-actions {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.tree-container-vertical {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  overflow-y: auto;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-height: 400px;
+}
+
+.empty-tree-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  color: #7f8c8d;
+  font-size: 16px;
+  font-style: italic;
+}
+
 .tool-name {
   font-weight: bold;
   color: #2c3e50;
   margin-bottom: 5px;
 }
+
+.code-block {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  white-space: pre;
+  overflow: auto;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  /* 竖向缩进参考线 */
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.06) 0,
+    rgba(0, 0, 0, 0.06) 1px,
+    transparent 1px,
+    transparent 24px
+  );
+}
+
+/* highlight.js 颜色优化 */
+.hljs-attr { color: #8e44ad; font-weight: 700; }
+.hljs-string { color: #27ae60; }
+.hljs-number { color: #3498db; }
+.hljs-literal { color: #e67e22; }
+.hljs-punctuation { color: #7f8c8d; }
 
 .tool-desc {
   font-size: 12px;
